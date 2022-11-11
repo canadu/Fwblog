@@ -58,4 +58,9 @@ abstract class DbRepository
   {
     $this->con->rollBack();
   }
+
+  public function hashPassword($password)
+  {
+    return password_hash($password, ENT_QUOTES);
+  }
 }

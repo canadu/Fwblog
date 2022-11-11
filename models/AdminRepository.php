@@ -12,15 +12,22 @@ class AdminRepository extends DbRepository
     ));
   }
 
-  public function hashPassword($password)
-  {
-    return password_hash($password, ENT_QUOTES);
-  }
-
   public function fetchByUserName($name)
   {
     $sql = "SELECT * FROM admin WHERE name = :name";
     return $this->fetch($sql, array(':name' => $name));
+  }
+
+  public function fetchAllAdmin()
+  {
+    $sql = "SELECT * FROM admin";
+    return $this->fetchAll($sql);
+  }
+
+  public function fetchAllAdminLimit10()
+  {
+    $sql = "SELECT DISTINCT name FROM admin LIMIT 10";
+    return $this->fetchAll($sql);
   }
 
   public function updatePassword($id, $password)

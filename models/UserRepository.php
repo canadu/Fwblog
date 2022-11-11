@@ -1,44 +1,88 @@
 <?php
-class AdminRepository extends DbRepository
+class UserRepository extends DbRepository
 {
-
-  public function insert($name, $password)
+  /**
+   * ログインユーザーに関連するコメントを取得する。
+   */
+  public function fetchByUser($email)
   {
+    $sql = "SELECT * FROM users WHERE email = :email";
+    return $this->fetch($sql, array(':email' => $email));
+  }
+
+  /**
+   * ログインユーザーに関連するコメントを取得する。
+   */
+  public function fetchByUserById($id)
+  {
+    $sql = "SELECT * FROM users WHERE id = :id";
+    return $this->fetch($sql, array(':id' => $id));
+  }
+
+
+  /**
+   * ユーザーIDの重複を調べる
+   */
+  public function isUniqueUserAccount($email)
+  {
+    $sql = "SELECT COUNT(id) as count FROM users WHERE email = :email";
+    $row = $this->fetch($sql, array(':email' => $email));
+    if ($row['count'] === '0') {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * ユーザーを新規登録する
+   */
+  public function insert($name, $email, $password)
+  {
+    //パスワードはハッシュ化した上でDBに登録する
     $password = $this->hashPassword($password);
-    $sql = "INSERT INTO admin(name,password) VALUES(:name, :password)";
+    $sql = "INSERT INTO users(name, email, password) VALUES(:name, :email, :password)";
     $stmt = $this->execute($sql, array(
       ':name' => $name,
+      ':email' => $email,
       ':password' => $password,
     ));
   }
 
-  public function hashPassword($password)
+  /**
+   * ユーザー名を更新する
+   */
+  public function updateUserNameById($name, $id)
   {
-    return password_hash($password, ENT_QUOTES);
-  }
-
-  public function fetchByUserName($name)
-  {
-    $sql = "SELECT * FROM admin WHERE name = :name";
-    return $this->fetch($sql, array(':name' => $name));
-  }
-
-  public function updatePassword($id, $password)
-  {
-    $password = $this->hashPassword($password);
-    $sql = "UPDATE admin SET password = :password WHERE id = :id";
+    $sql = "UPDATE users SET name = :name WHERE id = :id";
     $stmt = $this->execute($sql, array(
+      ':name' => $name,
       ':id' => $id,
-      ':password' => $password,
     ));
   }
 
-  public function updateName($id, $name)
+  /**
+   * メールアドレスを更新する
+   */
+  public function updateEmailById($email, $id)
   {
-    $sql = "UPDATE admin SET name = :name WHERE id = :id";
+    $sql = "UPDATE users SET email = :email WHERE id = :id";
     $stmt = $this->execute($sql, array(
+      ':email' => $email,
       ':id' => $id,
-      ':name' => $name,
+    ));
+  }
+
+  /**
+   * パスワードを更新する
+   */
+  public function updatePasswordById($password, $id)
+  {
+    //パスワードはハッシュ化した上でDBに登録する
+    $password = $this->hashPassword($password);
+    $sql = "UPDATE users SET password = :password WHERE id = :id";
+    $stmt = $this->execute($sql, array(
+      ':password' => $password,
+      ':id' => $id,
     ));
   }
 }

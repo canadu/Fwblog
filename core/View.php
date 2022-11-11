@@ -33,7 +33,10 @@ class View
   }
 
   /**
+   * レイアウトに渡す変数を指定
    *
+   * @param string $name
+   * @param mixed $value
    */
   public function setLayoutVar($name, $value)
   {
@@ -78,7 +81,6 @@ class View
     }
     return $content;
   }
-
 
   public function escape($string)
   {
