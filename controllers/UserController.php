@@ -660,10 +660,42 @@ class UserController extends Controller
       return $this->redirect('/');
     }
 
+    // いいねをクリックした場合 =======================================================
+    if ($this->request->isPost()) {
+
+      $like_post = $this->request->getPost('like_post');
+
+      if (isset($like_post)) {
+
+        if (isset($user)) {
+
+          $post_id = $this->request->getPost('post_id');
+          $admin_id = $this->request->getPost('admin_id');
+
+          //いいねした投稿記事を取得
+          $select_post_like = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['id'], $post_id);
+
+          if ($select_post_like) {
+            //既にレコードがある場合(いいねが押されている場合)
+            $this->db_manager->get('Like')->DelLike($post_id);
+            $errors[] = 'いいねを取り消しました';
+          } else {
+            //いいねが押されていない場合
+            $this->db_manager->get('Like')->insert($user['id'], $post_id, $admin_id);
+            $errors[] = 'いいねを追加しました';
+          }
+        } else {
+          $errors[] = '最初にログインしてください。';
+        }
+      }
+    }
+    // ===============================================================================
+
+
     $author = $params['name'];
 
     $count_post_likes = array();
-    $count_admin_comments = array();
+    $count_post_comments = array();
     $confirm_likes = array();
 
     //管理者の投稿を取得
@@ -682,7 +714,7 @@ class UserController extends Controller
         $count_post_comments[] = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
         //ユーザーのいいねを取得
-        $confirm_likes[] = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['id'], $post_id);
+        $confirm_likes[] = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
       }
     }
 
@@ -777,13 +809,14 @@ class UserController extends Controller
   //userがコメントをした投稿記事を表示
   public function user_commentsAction()
   {
-
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
     if (!$this->session->isAuthenticated() || empty($user)) {
       return $this->redirect('/');
     }
+
+    $select_edit_comment = array();
 
     if ($this->request->isPost()) {
 
@@ -812,67 +845,59 @@ class UserController extends Controller
         } else {
           $errors[] = '最初にログインしてください。';
         }
-      } else {
+      }
+      // ===============================================================================
 
-        $edit_comment = $this->request->getPost('edit_comment');
-        if (isset($edit_comment)) {
-          $edit_comment_id = $this->request->getPost('edit_comment_id');
-          $comment_edit_box = $this->request->getPost('comment_edit_box');
+      $edit_comment = $this->request->getPost('edit_comment');
 
-          $verify_comment =  $this->db_manager->get('Comment')->fetchAllCommentByCommentAndPostId($comment_edit_box, $edit_comment_id);
-          if ($verify_comment) {
-            $errors[] = 'コメントは既に追加されています。';
-          } else {
-            $this->db_manager->get('Comment')->update($comment_edit_box, $edit_comment_id);
-            $errors[] = 'コメントを修正しました。';
-          }
+      if (isset($edit_comment)) {
+        $edit_comment_id = $this->request->getPost('edit_comment_id');
+        $comment_edit_box = $this->request->getPost('comment_edit_box');
+        //コメントを取得
+        $verify_comment = $this->db_manager->get('Comment')->fetchAllCommentByCommentAndPostId($comment_edit_box, $edit_comment_id);
+
+        if ($verify_comment) {
+          //既にレコードがある場合
+          $errors[] = 'コメントは既に追加されています';
+        } else {
+          //いいねが押されていない場合
+          $this->db_manager->get('Comment')->update($comment_edit_box, $edit_comment_id);
+          $errors[] = 'コメントを修正しました';
         }
+      }
 
-        $edit_comment = $this->request->getPost('delete_comment');
-        if (isset($delete_comment)) {
-          $delete_comment_id = $this->request->getPost('comment_id');
-          $this->db_manager->get('Comment')->delete($delete_comment_id);
-          $errors[] = 'コメントを削除しました。';
-        }
+      $delete_comment = $this->request->getPost('delete_comment');
+      if (isset($delete_comment)) {
+        $delete_comment_id = $this->request->getPost('comment_id');
+        //コメントを取得
+        $verify_comment = $this->db_manager->get('Comment')->delete($delete_comment_id);
+        $errors[] = 'コメントを削除しました';
+      }
+
+      //コメント編集をクリックした場合、IDからコメントを取得
+      $open_edit_box = $this->request->getPost('open_edit_box');
+      if (isset($open_edit_box)) {
+        $comment_id = $this->request->getPost('comment_id');
+        $select_edit_comment = $this->db_manager->get('Comment')->fetchCommentById($comment_id);
       }
     }
 
-
-
+    //ユーザーのコメントを取得
+    $select_comments = $this->db_manager->get('Comment')->fetchAllCommentByUserId($user['id']);
 
     $select_posts = array();
-    //ユーザーのいいねを取得
-    $select_likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($user['id']);
-
-    if (isset($select_likes)) {
-
-      foreach ($select_likes as $like) {
-
-        $post_id = $like['post_id'];
-
-        $count_post_likes = 0;
-        $count_post_comments = 0;
-
-        //いいねした投稿記事を取得
-        $like_post = $this->db_manager->get('Post')->fetchPostId($post_id);
-
-        if (isset($like_post)) {
-          if ($like_post['status'] != $this->application::NON_ACTIVE_STATUS) {
-            //投稿記事のいいね件数を取得
-            $count_post_likes = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
-            //コメントの件数を取得
-            $count_post_comments = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
-          }
-        }
-        $like_post['total_post_likes'] = $count_post_likes['total'];
-        $like_post['total_post_comments'] = $count_post_comments['total'];
-        $select_posts[] = $like_post;
+    if (isset($select_comments)) {
+      foreach ($select_comments as $comment) {
+        $post_id = $comment['post_id'];
+        $select_posts[] = $this->db_manager->get('Post')->fetchPostId($post_id);
       }
     }
 
     return $this->render(array(
+      'select_edit_comment' => $select_edit_comment,
+      'select_comments' => $select_comments,
       'select_posts' => $select_posts,
       'errors' => $errors,
-    ), 'user_likes', 'user_layout');
+    ), 'user_comments', 'user_layout');
   }
 }

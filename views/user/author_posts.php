@@ -18,7 +18,7 @@
         $confirm_like = $confirm_likes[$idx];
 
     ?>
-        <form action="post" class="box">
+        <form method="post" class="box">
           <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
           <input type="hidden" name="admin_id" value="<?php echo $post['admin_id']; ?>">
 
@@ -39,7 +39,7 @@
           <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>" class="inline-btn">もっと見る</a>
           <div class="icons">
             <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_comments; ?>)</span></a>
-            <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if (isset($confirm_like)) {
+            <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if (isset($confirm_like) && (int)$confirm_like['total'] > 0) {
                                                                                     echo 'color:var(--red);';
                                                                                   } ?>  "></i><span>(<?= $total_post_likes; ?>)</span></button>
           </div>

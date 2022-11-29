@@ -65,6 +65,18 @@ class LikeRepository extends DbRepository
   }
 
   /**
+   * ユーザーがいいねした投稿を取得
+   */
+  public function fetchCountLikeByUserIdPostId($user_id, $post_id)
+  {
+    $sql = "SELECT COUNT(*) as total FROM likes WHERE user_id = :user_id AND post_id = :post_id";
+    return $this->fetch($sql, array(':user_id' => $user_id, ':post_id' => $post_id));
+  }
+
+
+
+
+  /**
    * ユーザーのいいねを削除
    */
   public function DelLike($post_id)
