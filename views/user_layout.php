@@ -24,7 +24,7 @@
       <a href="<?php echo $base_url; ?>/" class="logo">Blog</a>
 
       <!-- 検索フォーム -->
-      <form action="search.php" method="post" class="search-form">
+      <form action="<?php echo $base_url; ?>/user/search_post" method="post" class="search-form">
         <input type="text" name="search_box" class="box" maxlength="100" placeholder="検索">
         <button type="submit" class="fas fa-search" name="search_btn"></button>
       </form>

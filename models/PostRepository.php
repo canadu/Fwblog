@@ -25,7 +25,7 @@ class PostRepository extends DbRepository
   public function fetchAllByPostByStatusAndId($status, $id)
   {
     $sql = "SELECT * FROM posts WHERE status = :status AND id = :id";
-    return $this->fetchAll($sql, array(':status' => $status, 'id' => $id));
+    return $this->fetchAll($sql, array(':status' => $status, ':id' => $id));
   }
 
   /**
@@ -34,7 +34,7 @@ class PostRepository extends DbRepository
   public function fetchAllByPostByStatusAndName($status, $name)
   {
     $sql = "SELECT * FROM posts WHERE status = :status AND name = :name";
-    return $this->fetchAll($sql, array(':status' => $status, 'name' => $name));
+    return $this->fetchAll($sql, array(':status' => $status, ':name' => $name));
   }
 
 
@@ -44,9 +44,8 @@ class PostRepository extends DbRepository
   public function fetchCountByPostByStatusAndAdminId($status, $admin_id)
   {
     $sql = "SELECT COUNT(*)  AS total FROM posts WHERE status = :status AND admin_id = :admin_id";
-    return $this->fetch($sql, array(':status' => $status, 'admin_id' => $admin_id));
+    return $this->fetch($sql, array(':status' => $status, ':admin_id' => $admin_id));
   }
-
 
   /**
    * 投稿を取得する
@@ -54,6 +53,13 @@ class PostRepository extends DbRepository
   public function fetchPostId($id)
   {
     $sql = "SELECT * FROM posts WHERE id = :id";
-    return $this->fetch($sql, array('id' => $id));
+    return $this->fetch($sql, array(':id' => $id));
+  }
+
+  public function fetchAllPostByInputWords($input_word, $status)
+  {
+    $input_word = "%" . $input_word . "%";
+    $sql = "SELECT * FROM posts WHERE title LIKE :input_word OR category LIKE :input_word2 AND status = :status";
+    return $this->fetchAll($sql, array(':input_word' => $input_word, ':input_word2' => $input_word, ':status' => $status));
   }
 }

@@ -68,6 +68,7 @@ class BlogApplication extends Application
       '/user/user_comments' => array('controller' => 'user', 'action' => 'user_comments'),
       '/user/view_authors' => array('controller' => 'user', 'action' => 'view_authors'),
       '/user/:action' => array('controller' => 'user'),
+      '/user/search_post' => array('controller' => 'search_post'),
 
       //'/status/post' => array('controller' => 'status', 'action' => 'post'),
       // '/user/:user_name' => array('controller' => 'status', 'action' => 'user'),

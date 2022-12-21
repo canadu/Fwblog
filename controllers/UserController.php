@@ -691,7 +691,6 @@ class UserController extends Controller
     }
     // ===============================================================================
 
-
     $author = $params['name'];
 
     $count_post_likes = array();
@@ -899,5 +898,88 @@ class UserController extends Controller
       'select_posts' => $select_posts,
       'errors' => $errors,
     ), 'user_comments', 'user_layout');
+  }
+
+
+
+  public function search_postAction()
+  {
+
+    //セッションからユーザー情報を取得
+    $user = $this->session->get('user');
+
+    if (!$this->session->isAuthenticated() || empty($user)) {
+      return $this->redirect('/');
+    }
+
+    $select_posts = '';
+
+    $count_post_likes = array();
+    $count_post_comments = array();
+    $confirm_likes = array();
+
+    if ($this->request->isPost()) {
+
+      $like_post = $this->request->getPost('like_post');
+
+      if (isset($like_post)) {
+        // いいねをクリックした場合 =======================================================
+        if (isset($user)) {
+
+          $post_id = $this->request->getPost('post_id');
+          $admin_id = $this->request->getPost('admin_id');
+
+          //いいねした投稿記事を取得
+          $select_post_like = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['id'], $post_id);
+
+          if ($select_post_like) {
+            //既にレコードがある場合(いいねが押されている場合)
+            $this->db_manager->get('Like')->DelLike($post_id);
+            $errors[] = 'いいねを取り消しました';
+          } else {
+            //いいねが押されていない場合
+            $this->db_manager->get('Like')->insert($user['id'], $post_id, $admin_id);
+            $errors[] = 'いいねを追加しました';
+          }
+        } else {
+          $errors[] = '最初にログインしてください。';
+        }
+        // ===============================================================================
+      }
+
+      $search_box = $this->request->getPost('search_box');
+      $search_btn = $this->request->getPost('search_btn');
+
+      if (isset($search_box) or isset($search_btn)) {
+
+        //いいねした投稿記事を取得
+        $select_posts = $this->db_manager->get('Post')->fetchAllPostByInputWords($search_box, $this->application::ACTIVE_STATUS);
+
+        if (isset($select_posts)) {
+
+          foreach ($select_posts as $select_post) {
+
+            $post_id = $select_post['post_id'];
+
+            //いいねの件数を取得
+            $count_post_likes[] = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
+
+            //コメントの件数を取得
+            $count_post_comments[] = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
+
+            //ユーザーのいいねを取得
+            $confirm_likes[] = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+          }
+        }
+      }
+    }
+
+    return $this->render(array(
+      'select_posts' => $select_posts,
+      'count_post_likes' => $count_post_likes,
+      'count_post_comments' => $count_post_comments,
+      'confirm_likes' => $confirm_likes,
+      'errors' => $errors,
+    ), 'search_post', 'user_layout');
   }
 }

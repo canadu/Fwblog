@@ -1,28 +1,28 @@
-<?php $this->setLayoutVar('title', '管理者投稿一覧') ?>
+<?php $this->setLayoutVar('title', '検索') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
-<section class="posts-container">
-  <div class="box-container">
-    <?php
-    if (isset($select_posts)) {
-
+<?php if (!empty($select_posts)) {
+?>
+  <section class="posts-container">
+    <div class="box-container">
+      <?php
       $idx = 0;
-
       foreach ($select_posts as $post) {
 
-        //記事を取得
-        $total_post_likes = $count_post_likes[$idx]['total'];
+        $post_id = $post['id'];
 
-        //いいねの件数を取得
-        $total_post_comments = $count_post_comments[$idx]['total'];
+        //各投稿毎のいいねの件数を取得
+        $total_post_like = $count_post_likes[$idx]['total'];
 
-        //コメントの件数を取得
-        $confirm_like = $confirm_likes[$idx];
+        //各投稿毎のコメントの件数を取得
+        $total_post_comment = $count_post_comments[$idx]['total'];
 
-    ?>
+        //ユーザーのいいねを取得
+        $confirm_like = $confirm_likes[$idx]['total'];
+
+      ?>
         <form method="post" class="box">
-          <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+          <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
           <input type="hidden" name="admin_id" value="<?php echo $post['admin_id']; ?>">
-
           <div class="post-admin">
             <i class="fas fa-user"></i>
             <div>
@@ -39,18 +39,20 @@
           <div class="post-content content-150"><?php echo $post['content']; ?></div>
           <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>" class="inline-btn">もっと見る</a>
           <div class="icons">
-            <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_comments; ?>)</span></a>
+            <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_like; ?>)</span></a>
             <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if (isset($confirm_like) && (int)$confirm_like['total'] > 0) {
                                                                                     echo 'color:var(--red);';
-                                                                                  } ?>  "></i><span>(<?= $total_post_likes; ?>)</span></button>
+                                                                                  } ?>  "></i><span>(<?= $total_post_like; ?>)</span></button>
           </div>
         </form>
-    <?php
+      <?php
         $idx++;
       }
-    } else {
-      echo '<p class="empty">まだ投稿はありません。</p>';
-    }
-    ?>
-  </div>
-</section>
+      ?>
+    </div>
+  </section>
+<?php
+} else {
+  echo '<section><p class="empty">該当する投稿はありません</p></section>';
+}
+?>
