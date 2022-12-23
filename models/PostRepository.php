@@ -62,4 +62,13 @@ class PostRepository extends DbRepository
     $sql = "SELECT * FROM posts WHERE title LIKE :input_word OR category LIKE :input_word2 AND status = :status";
     return $this->fetchAll($sql, array(':input_word' => $input_word, ':input_word2' => $input_word, ':status' => $status));
   }
+
+  /**
+   * 管理者IDをキーに投稿を取得する
+   */
+  public function fetchAllPostByAdminId($admin_id)
+  {
+    $sql = "SELECT * FROM posts WHERE admin_id = :admin_id";
+    return $this->fetchAll($sql, array(':admin_id' => $admin_id));
+  }
 }

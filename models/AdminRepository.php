@@ -18,6 +18,13 @@ class AdminRepository extends DbRepository
     return $this->fetch($sql, array(':name' => $name));
   }
 
+
+  public function fetchById($id)
+  {
+    $sql = "SELECT * FROM admin WHERE id = :id";
+    return $this->fetch($sql, array(':id' => $id));
+  }
+
   public function fetchAllAdmin()
   {
     $sql = "SELECT * FROM admin";

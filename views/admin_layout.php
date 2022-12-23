@@ -11,6 +11,27 @@
 </head>
 
 <body>
+  <!-- ナビゲーションメニュー -->
+  <header class="header">
+    <a href="dashboard.php" class="logo">Admin<span>Panel</span></a>
+    <div class="profile">
+      <p><?php echo $admin['name']; ?></p>
+      <a href="update_profile.php" class="btn">プロフィールを更新</a>
+    </div>
+    <nav class="navbar">
+      <a href="<?php echo $base_url; ?>/admin/dashboard"><i class="fas fa-home"></i><span>ホーム</span></a>
+      <a href="add_posts.php"><i class="fas fa-pen"></i><span>投稿</span></a>
+      <a href="view_posts.php"><i class="fas fa-eye"></i><span>閲覧</span></a>
+      <a href="admin_accounts.php"><i class="fas fa-user"></i><span>アカウント</span></a>
+      <a href="../components/admin_logout.php" style="color:var(--red);" onclick="return confirm('サイトからログアウトしますか？');"><i class="fas fa-right-from-bracket"></i><span>ログアウト</span></a>
+    </nav>
+    <div class="flex-btn">
+      <a href="<?php echo $base_url; ?>/admin/admin_login" class="option-btn">ログイン</a>
+      <a href="<?php echo $base_url; ?>/admin/admin_register" class="option-btn">登録</a>
+    </div>
+  </header>
+  <!-- ナビゲーションメニュー -->
+  <div id="menu-btn" class="fas fa-bars"></div>
   <?php echo $_content; ?>
   <script src="../js/admin_script.js"></script>
 </body>

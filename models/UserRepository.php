@@ -1,6 +1,13 @@
 <?php
 class UserRepository extends DbRepository
 {
+  public function fetchAllUser()
+  {
+    $sql = "SELECT * FROM user";
+    return $this->fetchAll($sql);
+  }
+
+
   /**
    * ログインユーザーに関連するコメントを取得する。
    */
@@ -9,7 +16,6 @@ class UserRepository extends DbRepository
     $sql = "SELECT * FROM users WHERE email = :email";
     return $this->fetch($sql, array(':email' => $email));
   }
-
   /**
    * ログインユーザーに関連するコメントを取得する。
    */
