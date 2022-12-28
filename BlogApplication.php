@@ -70,10 +70,13 @@ class BlogApplication extends Application
       '/user/:action' => array('controller' => 'user'),
       '/user/search_post' => array('controller' => 'search_post'),
       '/admin/dashboard' => array('controller' => 'admin', 'action' => 'dashboard'),
-      '/admin/add_posts' => array('controller' => 'admin', 'action' => 'add_posts'),
       '/admin/admin_login' => array('controller' => 'admin', 'action' => 'admin_login'),
       '/admin/admin_register' => array('controller' => 'admin', 'action' => 'admin_register'),
       '/admin/update_profile' => array('controller' => 'admin', 'action' => 'update_profile'),
+      '/admin/admin_logout' => array('controller' => 'admin', 'action' => 'admin_logout'),
+      '/admin/add_posts' => array('controller' => 'admin', 'action' => 'add_posts'),
+      '/admin/view_posts' => array('controller' => 'admin', 'action' => 'view_posts'),
+      '/admin/read_post/:post_id' => array('controller' => 'admin', 'action' => 'read_post'),
     );
   }
 

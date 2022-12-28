@@ -11,19 +11,22 @@
 </head>
 
 <body>
+  <?php if (isset($errors) && count($errors) > 0) : ?>
+    <?php echo $this->render('errors', array('errors' => $errors)); ?>
+  <?php endif; ?>
   <!-- ナビゲーションメニュー -->
   <header class="header">
-    <a href="dashboard.php" class="logo">Admin<span>Panel</span></a>
+    <a href="<?php echo $base_url; ?>/admin/dashboard" class="logo">Admin<span>Panel</span></a>
     <div class="profile">
       <p><?php echo $admin['name']; ?></p>
-      <a href="update_profile.php" class="btn">プロフィールを更新</a>
+      <a href="<?php echo $base_url; ?>/admin/update_profile" class="btn">プロフィールを更新</a>
     </div>
     <nav class="navbar">
       <a href="<?php echo $base_url; ?>/admin/dashboard"><i class="fas fa-home"></i><span>ホーム</span></a>
-      <a href="add_posts.php"><i class="fas fa-pen"></i><span>投稿</span></a>
-      <a href="view_posts.php"><i class="fas fa-eye"></i><span>閲覧</span></a>
-      <a href="admin_accounts.php"><i class="fas fa-user"></i><span>アカウント</span></a>
-      <a href="../components/admin_logout.php" style="color:var(--red);" onclick="return confirm('サイトからログアウトしますか？');"><i class="fas fa-right-from-bracket"></i><span>ログアウト</span></a>
+      <a href="<?php echo $base_url; ?>/admin/add_posts"><i class="fas fa-pen"></i><span>投稿</span></a>
+      <a href="<?php echo $base_url; ?>/admin/view_posts"><i class="fas fa-eye"></i><span>閲覧</span></a>
+      <a href="<?php echo $base_url; ?>/admin/admin_accounts"><i class="fas fa-user"></i><span>アカウント</span></a>
+      <a href="<?php echo $base_url; ?>/admin/admin_logout" style="color:var(--red);" onclick="return confirm('サイトからログアウトしますか？');"><i class="fas fa-right-from-bracket"></i><span>ログアウト</span></a>
     </nav>
     <div class="flex-btn">
       <a href="<?php echo $base_url; ?>/admin/admin_login" class="option-btn">ログイン</a>

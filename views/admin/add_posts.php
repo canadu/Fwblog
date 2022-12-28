@@ -1,8 +1,10 @@
 <?php $this->setLayoutVar('title', '新規投稿') ?>
+<?php $this->setLayoutVar('errors', $errors) ?>
+
 <section class="post-editor">
   <h1 class="heading">新規投稿</h1>
   <form action="" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="name" value="<?php echo $fetch_profile['name']; ?>">
+    <input type="hidden" name="name" value="<?php echo $admin['name']; ?>">
     <p>投稿タイトル<span>*</span></p>
     <input type="text" name="title" maxlength="100" require placeholder="投稿タイトルを入力してください。" class="box">
     <p>投稿記事<span>*</span></p>
@@ -10,7 +12,7 @@
     <p>投稿カテゴリ<span>*</span></p>
     <select name="category" class="box" required>
       <option value="" selected disabled>-- カテゴリを選択</option>
-      <?php foreach ($category_array as $key => $value) { ?>
+      <?php foreach ($category as $key => $value) { ?>
         <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
       <?php } ?>
     </select>

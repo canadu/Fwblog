@@ -71,4 +71,34 @@ class PostRepository extends DbRepository
     $sql = "SELECT * FROM posts WHERE admin_id = :admin_id";
     return $this->fetchAll($sql, array(':admin_id' => $admin_id));
   }
+
+  // 投稿
+  public function insert($admin_id, $name, $title, $content, $category, $image, $status)
+  {
+    $sql = "INSERT INTO posts(admin_id, name, title, content, category, image, status) VALUES(:admin_id, :name, :title, :content, :category, :image, :status)";
+    $stmt = $this->execute($sql, array(
+      ':admin_id' => $admin_id,
+      ':name' => $name,
+      ':title' => $title,
+      ':content' => $content,
+      ':category' => $category,
+      ':image' => $image,
+      ':status' => $status,
+    ));
+  }
+  // 投稿の削除
+  public function delete($id)
+  {
+    $sql = "DELETE FROM posts WHERE id = :id";
+    $stmt = $this->execute($sql, array(
+      ':id' => $id
+    ));
+  }
+
+  //管理者が投稿した記事を取得する
+  public function fetchPostByAdminIdAndId($admin_id, $id)
+  {
+    $sql = "SELECT * FROM posts WHERE admin_id = :admin_id AND id = :id";
+    return $this->fetch($sql, array(':admin_id' => $admin_id, ':id' => $id));
+  }
 }

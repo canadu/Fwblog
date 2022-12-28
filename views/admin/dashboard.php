@@ -13,21 +13,21 @@
     <div class="box">
       <h3><?php echo $number_of_posts; ?></h3>
       <p>投稿総数</p>
-      <a href="add_posts.php" class="btn">新規に投稿</a>
+      <a href="<?php echo $base_url; ?>/admin/add_posts" class="btn">新規に投稿</a>
     </div>
 
     <!-- 公開されている投稿  -->
     <div class="box">
       <h3><?php echo $number_of_active_posts; ?></h3>
       <p>公開件数</p>
-      <a href="<?php echo $base_url; ?>/admin/view_post/<?php echo $this->application::ACTIVE_STATUS; ?>" class="btn">公開されている投稿</a>
+      <a href="<?php echo $base_url; ?>/admin/view_post/active" class="btn">公開されている投稿</a>
     </div>
 
     <!-- 非公開な投稿  -->
     <div class="box">
       <h3><?php echo $number_of_deactive_posts; ?></h3>
       <p>非公開件数</p>
-      <a href="<?php echo $base_url; ?>/admin/view_post/<?php echo $this->application::NON_ACTIVE_STATUS; ?>" class="btn">非公開の投稿</a>
+      <a href="<?php echo $base_url; ?>/admin/view_post/deactive" class="btn">非公開の投稿</a>
     </div>
 
     <!-- ユーザーアカウント -->

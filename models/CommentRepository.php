@@ -97,9 +97,18 @@ class CommentRepository extends DbRepository
   }
 
   // コメントの削除
-  public function delete($post_id)
+  public function delete($id)
   {
-    $sql = "DELETE FROM comments WHERE id = :post_id";
+    $sql = "DELETE FROM comments WHERE id = :id";
+    $stmt = $this->execute($sql, array(
+      ':id' => $id
+    ));
+  }
+
+  // コメントの削除
+  public function deleteByPostId($post_id)
+  {
+    $sql = "DELETE FROM comments WHERE post_id = :post_id";
     $stmt = $this->execute($sql, array(
       ':post_id' => $post_id
     ));

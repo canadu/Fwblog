@@ -39,11 +39,11 @@ class AdminRepository extends DbRepository
 
   public function updatePassword($id, $password)
   {
-    $password = $this->hashPassword($password);
+    $hash = $this->hashPassword($password);
     $sql = "UPDATE admin SET password = :password WHERE id = :id";
     $stmt = $this->execute($sql, array(
       ':id' => $id,
-      ':password' => $password,
+      ':password' => $hash,
     ));
   }
 
