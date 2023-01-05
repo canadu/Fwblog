@@ -9,7 +9,7 @@
   </form>
   <div class="box-container">
     <?php
-    if (($select_posts) || !empty($view_posts)) {
+    if (!empty($view_posts)) {
       foreach ($view_posts as $view_post) {
     ?>
         <form method="post" class="box">
@@ -32,14 +32,13 @@
             <a href="<?php echo $base_url; ?>/admin/edit_post/<?php echo $view_post['post_id']; ?>" class="option-btn">編集</a>
             <button type="submit" name="delete" class="delete-btn" onclick="return confirm('この投稿を削除しますか？');">削除</button>
           </div>
-          <a href="<?php echo $base_url; ?>/admin/read_post/<?php echo $view_post['post_id']; ?>" class="btn">投稿を見る</a>
+          <a href="<?php echo $base_url; ?>read_post/<?php echo $view_post['post_id']; ?>" class="btn">投稿を見る</a>
         </form>
-    <?php
+      <?php
       }
     } else {
-      //投稿がない場合
-      echo '<p class="empty">まだ投稿はありません。<a href="add_posts.php" class="btn" style="margin-top:1.5rem;">記事を投稿する</a></p>';
-    }
-    ?>
+      ?>
+      <p class="empty">まだ投稿はありません。<a href="<?php echo $base_url; ?>/admin/add_posts" class="btn" style="margin-top:1.5rem;">記事を投稿する</a></p>
+    <?php } ?>
   </div>
 </section>

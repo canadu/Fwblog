@@ -55,4 +55,13 @@ class AdminRepository extends DbRepository
       ':name' => $name,
     ));
   }
+
+  // アカウントの削除
+  public function delete($id)
+  {
+    $sql = "DELETE FROM admin WHERE id = :id";
+    $stmt = $this->execute($sql, array(
+      ':id' => $id
+    ));
+  }
 }

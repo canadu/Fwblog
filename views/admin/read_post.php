@@ -3,7 +3,7 @@
 
 <section class="read-post">
   <?php
-  if (($select_posts) || !empty($view_posts)) {
+  if (!empty($view_posts)) {
     foreach ($view_posts as $post_data) {
       $post_id = $post_data['post_id'];
   ?>

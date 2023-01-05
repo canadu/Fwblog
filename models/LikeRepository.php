@@ -74,8 +74,6 @@ class LikeRepository extends DbRepository
   }
 
 
-
-
   /**
    * ユーザーのいいねを削除
    */
@@ -83,5 +81,15 @@ class LikeRepository extends DbRepository
   {
     $sql = "DELETE FROM likes WHERE post_id = :post_id";
     return $this->execute($sql, array(':post_id' => $post_id));
+  }
+
+
+  /**
+   * 管理者ののいいねを削除
+   */
+  public function DelLikeByAdminId($admin_id)
+  {
+    $sql = "DELETE FROM likes WHERE admin_id = :admin_id";
+    return $this->execute($sql, array(':admin_id' => $admin_id));
   }
 }

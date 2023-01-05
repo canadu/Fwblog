@@ -53,6 +53,18 @@ class CommentRepository extends DbRepository
   }
 
   /**
+   * コメントを取得する
+   */
+  public function fetchAllCommentByAdminId($admin_id)
+  {
+    $sql = "SELECT * FROM comments WHERE admin_id = :admin_id";
+    return $this->fetchall(
+      $sql,
+      array(':admin_id' => $admin_id)
+    );
+  }
+
+  /**
    * 管理者のコメントを取得する
    */
   public function fetchCountCommentByAdminId($admin_id)
@@ -111,6 +123,15 @@ class CommentRepository extends DbRepository
     $sql = "DELETE FROM comments WHERE post_id = :post_id";
     $stmt = $this->execute($sql, array(
       ':post_id' => $post_id
+    ));
+  }
+
+  // コメントの削除
+  public function deleteByAdminId($admin_id)
+  {
+    $sql = "DELETE FROM comments WHERE admin_id = :admin_id";
+    $stmt = $this->execute($sql, array(
+      ':admin_id' => $admin_id
     ));
   }
 }

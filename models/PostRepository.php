@@ -37,6 +37,15 @@ class PostRepository extends DbRepository
     return $this->fetchAll($sql, array(':status' => $status, ':name' => $name));
   }
 
+  /**
+   * 投稿カテゴリー毎のデータを取得する
+   */
+  public function fetchAllPostByStatusAndAdminId($status, $admin_id)
+  {
+    $sql = "SELECT * FROM posts WHERE status = :status AND admin_id = :admin_id";
+    return $this->fetchAll($sql, array(':status' => $status, ':admin_id' => $admin_id));
+  }
+
 
   /**
    * 投稿カテゴリー毎のデータを取得する
@@ -46,6 +55,16 @@ class PostRepository extends DbRepository
     $sql = "SELECT COUNT(*)  AS total FROM posts WHERE status = :status AND admin_id = :admin_id";
     return $this->fetch($sql, array(':status' => $status, ':admin_id' => $admin_id));
   }
+
+  /**
+   * 投稿カテゴリー毎のデータを取得する
+   */
+  public function fetchPostCountByAdminId($admin_id)
+  {
+    $sql = "SELECT COUNT(*)  AS total FROM posts WHERE admin_id = :admin_id";
+    return $this->fetch($sql, array(':admin_id' => $admin_id));
+  }
+
 
   /**
    * 投稿を取得する
@@ -94,6 +113,18 @@ class PostRepository extends DbRepository
       ':id' => $id
     ));
   }
+
+  // 投稿の削除
+  public function deleteByAdminId($admin_id)
+  {
+    $sql = "DELETE FROM posts WHERE admin_id = :admin_id";
+    $stmt = $this->execute($sql, array(
+      ':admin_id' => $admin_id
+    ));
+  }
+
+
+
 
   //管理者が投稿した記事を取得する
   public function fetchPostByAdminIdAndId($admin_id, $id)

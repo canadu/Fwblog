@@ -36,7 +36,7 @@
   <!-- ナビゲーションメニュー -->
   <div id="menu-btn" class="fas fa-bars"></div>
   <?php echo $_content; ?>
-  <script src="../js/admin_script.js"></script>
+  <script src="../../js/admin_script.js"></script>
 </body>
 
 </html>

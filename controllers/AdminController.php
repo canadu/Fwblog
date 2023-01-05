@@ -320,7 +320,7 @@ class AdminController extends Controller
     return $this->redirect('/admin/admin_login');
   }
 
-  public function view_postsAction()
+  public function view_postsAction($params)
   {
 
     //管理者のセッション情報を取得する
@@ -354,12 +354,13 @@ class AdminController extends Controller
       }
     } else {
       // Getの場合
-      $status = $this->request->getGet('status');
+      //$status = $this->request->getGet('status');
+      $status = $params['status'];
     }
     //管理者の投稿を取得する
     $view_posts = array();
     if (!empty($status) && ($status == $this->application::ACTIVE_STATUS || $status == $this->application::NON_ACTIVE_STATUS)) {
-      $select_posts = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($status, $admin['id']);
+      $select_posts = $this->db_manager->get('Post')->fetchAllPostByStatusAndAdminId($status, $admin['id']);
     } else {
       $select_posts = $this->db_manager->get('Post')->fetchAllPostByAdminId($admin['id']);
     }
@@ -440,6 +441,7 @@ class AdminController extends Controller
     //対象管理者の投稿を取得して表示する
     $view_posts = array();
     $select_posts = $this->db_manager->get('Post')->fetchPostByAdminIdAndId($admin['id'], $post_id);
+
     if ($select_posts) {
 
       $post_id = $select_posts['id'];
@@ -484,12 +486,152 @@ class AdminController extends Controller
     ), 'read_post', 'admin_layout');
   }
 
+  public function admin_accountsAction()
+  {
+    //管理者のセッション情報を取得する
+    $admin = $this->session->get('admin');
+
+    if (!$this->session->isAuthenticated() || empty($admin)) {
+      return $this->redirect('/admin/admin_login');
+    }
+
+    $admin_id = $admin['id'];
+
+    if ($this->request->isPost()) {
+
+      //削除処理
+      $delete = $this->request->getPost('delete');
+
+      if (isset($delete)) {
+
+        $select_posts = $this->db_manager->get('Post')->fetchAllPostByAdminId($admin_id);
+        if (($select_posts) && $select_posts['image'] != '') {
+          //画像ファイルの削除
+          unlink('../web/upload_img/' . $select_posts['image']);
+        }
+
+        //投稿の削除
+        $this->db_manager->get('Post')->deleteByAdminId($admin_id);
+
+        //コメントの削除
+        $this->db_manager->get('Comment')->deleteByAdminId($admin_id);
+
+        //いいねの削除
+        $this->db_manager->get('Like')->DelLikeByAdminId($admin_id);
+
+        //アカウントの削除
+        $this->db_manager->get('Admin')->delete($admin_id);
+
+        return $this->redirect('/admin/admin_logout');
+      }
+    }
+
+    $admin_posts = array();
+
+    //管理者のアカウントを取得して表示する
+    $select_admins = $this->db_manager->get('Admin')->fetchAllAdmin();
+    $admin_count = count($select_admins);
+    if ($select_admins) {
+      while ($fetch_accounts = current($select_admins)) {
+        //$count_admin_posts = $this->db_manager->get('Post')->fetchAllPostByAdminId($fetch_accounts['id']);
+        $total_admin_posts = $this->db_manager->get('Post')->fetchPostCountByAdminId($fetch_accounts['id']);
+        $admin_posts[] = [
+          'id' => $fetch_accounts['id'],
+          'name' => $fetch_accounts['name'],
+          'total' => $total_admin_posts['total'],
+        ];
+        next($select_admins);
+      }
+    }
+
+    return $this->render(array(
+      'admin' => $admin,
+      'admin_posts' => $admin_posts,
+      'admin_count' => $admin_count,
+    ), 'admin_accounts', 'admin_layout');
+  }
+
+  public function commentsAction()
+  {
+    //管理者のセッション情報を取得する
+    $admin = $this->session->get('admin');
+
+    if (!$this->session->isAuthenticated() || empty($admin)) {
+      return $this->redirect('/admin/admin_login');
+    }
+
+    if ($this->request->isPost()) {
+      //削除処理
+      $delete = $this->request->getPost('delete_comment');
+      if (isset($delete)) {
+        $comment_id = $this->request->getPost('comment_id');
+        //コメントの削除
+        $this->db_manager->get('Comment')->delete($comment_id);
+        $message[] = 'コメントを削除しました。';
+      }
+    }
+
+    $comments = array();
+
+    //管理者コメントの件数の取得
+    $select_comments = $this->db_manager->get('Comment')->fetchAllCommentByAdminId($admin['id']);
+
+    $count_comments = count($select_comments);
+
+    if ($select_comments) {
+      while ($fetch_accounts = current($select_comments)) {
+        $select_posts = $this->db_manager->get('Post')->fetchPostId($fetch_accounts['post_id']);
+
+        $comments[] = [
+          'post_id' => $select_posts['id'],
+          'post_title' => $select_posts['title'],
+          'id' => $select_comments['id'],
+          'user_name' => $select_comments['user_name'],
+          'date' => $select_comments['date'],
+          'comment' => $select_comments['comment']
+        ];
+        next($select_comments);
+      }
+    }
+
+    return $this->render(array(
+      'admin' => $admin,
+      'comments' => $comments,
+      'count_comments' => $count_comments,
+    ), 'comments', 'admin_layout');
+  }
+
+  public function user_accountsAction()
+  {
+    //管理者のセッション情報を取得する
+    $admin = $this->session->get('admin');
+
+    if (!$this->session->isAuthenticated() || empty($admin)) {
+      return $this->redirect('/admin/admin_login');
+    }
+    $select_account = $this->db_manager->get('User')->fetchAllUser();
+    if ($select_account) {
+      while ($fetch_accounts = current($select_account)) {
+        $select_posts = $this->db_manager->get('Post')->fetchPostId($fetch_accounts['post_id']);
+
+        //ユーザーのコメントを取得
+
+        //ユーザーのいいねを取得
+
+
+
+
+
+        next($select_account);
+      }
+    }
+  }
 
 
 
 
   // プライベートでしか使用しないfunction ======================================================================
-  public function Post($id, $param_status)
+  private function Post($id, $param_status)
   {
     global $message;
     $name = $this->request->getPost('name');
@@ -520,7 +662,7 @@ class AdminController extends Controller
   }
 
   // アップロードファイルの妥当性をチェックする関数
-  function validateImage(): array
+  private function validateImage(): array
   {
     // PHPによるエラーを確認する
     if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
@@ -548,13 +690,13 @@ class AdminController extends Controller
   }
 
   // ファイル名を元に拡張子を返す関数
-  function getExtensions($file): string
+  private function getExtensions($file): string
   {
     return pathinfo($file, PATHINFO_EXTENSION);
   }
 
   // アップロード後に保存ファイル名を生成して返す関数
-  function generateImageName($name): string
+  private function generateImageName($name): string
   {
     return date('Ymd-His-') . rand(100000, 99999) . '.' . $this->getExtensions($name);
   }
