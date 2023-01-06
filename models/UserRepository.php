@@ -3,7 +3,7 @@ class UserRepository extends DbRepository
 {
   public function fetchAllUser()
   {
-    $sql = "SELECT * FROM user";
+    $sql = "SELECT * FROM users";
     return $this->fetchAll($sql);
   }
 

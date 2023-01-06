@@ -34,12 +34,13 @@
           </div>
 
           <?php if ($post['image'] != '') : ?>
-            <img src="uploaded_img/<?php echo $post['image']; ?>" class="post-image" alt="">
+            <img src="../../uploaded_img/<?php echo $post['image']; ?>" class="post-image" alt="">
           <?php endif; ?>
 
           <div class="post-title"><?php echo $post['title']; ?></div>
           <div class="post-content content-150"><?php echo $post['content']; ?></div>
           <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>" class="inline-btn">もっと見る</a>
+          <a href="<?php echo $base_url; ?>/user/category/<?php echo $post['category']; ?>" class="post-cat"> <i class="fas fa-tag"></i> <span><?= $category[$post['category']]; ?></span></a>
           <div class="icons">
             <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_comments; ?>)</span></a>
             <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($total_post_likes > 0 and $user['id'] != '') {

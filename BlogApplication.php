@@ -38,7 +38,6 @@ class BlogApplication extends Application
     'animations' => 'アニメ',
   );
 
-
   /**
    * ルートディレクトリへのパスを返す
    */
@@ -78,9 +77,11 @@ class BlogApplication extends Application
       '/admin/view_posts' => array('controller' => 'admin', 'action' => 'view_posts'),
       '/admin/view_posts/:status' => array('controller' => 'admin', 'action' => 'view_posts'),
       '/admin/read_post/:post_id' => array('controller' => 'admin', 'action' => 'read_post'),
+      '/admin/edit_post/:post_id' => array('controller' => 'admin', 'action' => 'edit_post'),
       '/admin/admin_accounts' => array('controller' => 'admin', 'action' => 'admin_accounts'),
       '/admin/comments' => array('controller' => 'admin', 'action' => 'comments'),
       '/admin/user_accounts' => array('controller' => 'admin', 'action' => 'user_accounts'),
+      '/admin/search_page' => array('controller' => 'admin', 'action' => 'search_page'),
     );
   }
 

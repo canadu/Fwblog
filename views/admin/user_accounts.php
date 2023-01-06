@@ -1,11 +1,11 @@
 <?php $this->setLayoutVar('title', 'ユーザーアカウント') ?>
-<?php $this->setLayoutVar('errors', $errors) ?>
+<!-- <?php $this->setLayoutVar('errors', $errors) ?> -->
 
 <section class="accounts">
   <h1 class="heading">ユーザーアカウント</h1>
   <div class="box-container">
     <?php
-    if ($select_account->rowCount() > 0 || !empty($users_list)) {
+    if (!empty($users_list)) {
       foreach ($users_list as $user) {
     ?>
         <div class="box">

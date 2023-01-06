@@ -82,6 +82,13 @@ class PostRepository extends DbRepository
     return $this->fetchAll($sql, array(':input_word' => $input_word, ':input_word2' => $input_word, ':status' => $status));
   }
 
+  public function fetchAllPostByInputWordsAndAdminId($admin_id, $input_word)
+  {
+    $input_word = "%" . $input_word . "%";
+    $sql = "SELECT * FROM posts WHERE admin_id = :admin_id and title LIKE :input_word OR category LIKE :input_word2";
+    return $this->fetchAll($sql, array(':admin_id' => $admin_id, ':input_word' => $input_word, ':input_word2' => $input_word));
+  }
+
   /**
    * 管理者IDをキーに投稿を取得する
    */
@@ -105,6 +112,7 @@ class PostRepository extends DbRepository
       ':status' => $status,
     ));
   }
+
   // 投稿の削除
   public function delete($id)
   {
@@ -123,13 +131,41 @@ class PostRepository extends DbRepository
     ));
   }
 
+  // 投稿の編集
+  public function update($title, $content, $category, $status, $id)
+  {
+    $sql = "UPDATE posts SET title=:title, content=:content, category=:category, status=:status WHERE id=:id";
 
-
+    $stmt = $this->execute($sql, array(
+      ':title' => $title,
+      ':content' => $content,
+      ':category' => $category,
+      ':status' => $status,
+      ':id' => $id,
+    ));
+  }
 
   //管理者が投稿した記事を取得する
   public function fetchPostByAdminIdAndId($admin_id, $id)
   {
     $sql = "SELECT * FROM posts WHERE admin_id = :admin_id AND id = :id";
     return $this->fetch($sql, array(':admin_id' => $admin_id, ':id' => $id));
+  }
+
+  //画像のファイル名を取得
+  public function fetchPostByImageAndAdminId($image, $admin_id)
+  {
+    $sql = "SELECT * FROM posts WHERE image = :image AND admin_id = :admin_id";
+    return $this->fetch($sql, array(':image' => $image, 'admin_id' => $admin_id));
+  }
+
+  // 投稿画像の編集
+  public function updateImage($image, $id)
+  {
+    $sql = "UPDATE posts SET image = :image WHERE id = :id";
+    $stmt = $this->execute($sql, array(
+      ':image' => $image,
+      ':id' => $id,
+    ));
   }
 }

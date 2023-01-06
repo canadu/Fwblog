@@ -91,7 +91,6 @@ class AdminController extends Controller
     return $this->render(array(
       'admin' => $admin,
       'errors' => $message,
-      'category' => $this->application::$category_array,
     ), 'add_posts', 'admin_layout');
   }
 
@@ -533,7 +532,6 @@ class AdminController extends Controller
     $admin_count = count($select_admins);
     if ($select_admins) {
       while ($fetch_accounts = current($select_admins)) {
-        //$count_admin_posts = $this->db_manager->get('Post')->fetchAllPostByAdminId($fetch_accounts['id']);
         $total_admin_posts = $this->db_manager->get('Post')->fetchPostCountByAdminId($fetch_accounts['id']);
         $admin_posts[] = [
           'id' => $fetch_accounts['id'],
@@ -609,25 +607,210 @@ class AdminController extends Controller
     if (!$this->session->isAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
+
     $select_account = $this->db_manager->get('User')->fetchAllUser();
+
+    $users_list = array();
     if ($select_account) {
+
       while ($fetch_accounts = current($select_account)) {
-        $select_posts = $this->db_manager->get('Post')->fetchPostId($fetch_accounts['post_id']);
 
         //ユーザーのコメントを取得
+        $count_user_comments = $this->db_manager->get('Comment')->fetchAllCommentByUserId($fetch_accounts['id']);
+        $total_user_comments = count($count_user_comments);
 
         //ユーザーのいいねを取得
+        $count_user_likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($fetch_accounts['id']);
+        $total_user_likes = count($count_user_likes);
 
-
-
-
-
+        $users_list[] = [
+          'user_id' => $fetch_accounts['id'],
+          'name' => $fetch_accounts['name'],
+          'total_user_comments' => $total_user_comments,
+          'total_user_likes' => $total_user_likes
+        ];
         next($select_account);
       }
     }
+
+    return $this->render(array(
+      'admin' => $admin,
+      'users_list' => $users_list,
+    ), 'user_accounts', 'admin_layout');
   }
 
+  //投稿の編集
+  public function edit_postAction($param)
+  {
+    //管理者のセッション情報を取得する
+    $admin = $this->session->get('admin');
 
+    if (!$this->session->isAuthenticated() || empty($admin)) {
+      return $this->redirect('/admin/admin_login');
+    }
+
+    if ($this->request->isPost()) {
+
+      //編集処理/
+      $save = $this->request->getPost('save');
+      if (isset($save)) {
+
+        //編集
+        //$post_id = $this->request->getPost('id');
+        $post_id = $param['post_id'];
+        $title = $this->request->getPost('title');
+        $content = $this->request->getPost('content');
+        $category = $this->request->getPost('category');
+        $status = $this->request->getPost('status');
+
+        //投稿の削除
+        $this->db_manager->get('Post')->update($title, $content, $category, $status, $post_id);
+        $message[] = '更新しました。';
+
+        $old_image = $this->request->getPost('old_image');
+        $image = htmlspecialchars($_FILES['image']['name']);
+        $image_size = $_FILES['image']['size'];
+        $image_tmp_name = $_FILES['image']['tmp_name'];
+        $image_folder = '../web/upload_img/' . $image;
+        $select_image = $this->db_manager->get('Post')->fetchPostByImageAndAdminId($image, $admin['id']);
+
+        if (!empty($image)) {
+          if ($image_size > 2000000) {
+            $message[] = '画像サイズが大きすぎます。';
+          } elseif ($select_image->rowCount() > 0 and $image != '') {
+            $message[] = '画像ファイル名が同じです。';
+          } else {
+            move_uploaded_file($image_tmp_name, $image_folder);
+            $this->db_manager->get('Post')->updateImage($image, $post_id);
+            if ($old_image != $image and $old_image != '') {
+              unlink('../web/upload_img/' . $old_image);
+            }
+            $message[] = '画像を更新しました。';
+          }
+        }
+      }
+
+      //投稿を削除
+      $delete_post = $this->request->getPost('delete_post');
+      if (isset($delete_post)) {
+
+        //$post_id = $this->request->getPost('id');
+        $post_id = $param['post_id'];
+        $delete_image = $this->db_manager->get('Post')->fetchPostId($post_id);
+        //画像ファイルを削除
+        if ($delete_image['image'] != '') {
+          unlink('../web/uploaded_img/' . $delete_image['image']);
+        }
+
+        //投稿を削除
+        $this->db_manager->get('Post')->delete($post_id);
+
+        //コメントを削除
+        $this->db_manager->get('Comment')->deleteByPostId($post_id);
+        $message[] = '投稿を削除しました。';
+      }
+
+      //画像のみを削除
+      $delete_image = $this->request->getPost('delete_image');
+      if (isset($delete_image)) {
+        $empty_image = '';
+        $post_id = $param['post_id'];
+        $delete_image = $this->db_manager->get('Post')->fetchPostId($post_id);
+        //画像ファイルを削除
+        if ($delete_image['image'] != '') {
+          unlink('../web/uploaded_img/' . $delete_image['image']);
+        }
+
+        //画像フィールドを更新
+        $this->db_manager->get('Post')->updateImage($empty_image, $post_id);
+        $message[] = '画像を削除しました。';
+      }
+    }
+
+    $post_id = $param['post_id'];
+    $select_posts = $this->db_manager->get('Post')->fetchPostId($post_id);
+
+    return $this->render(array(
+      'admin' => $admin,
+      'errors' => $message,
+      'category' => $this->application::$category_array,
+      'select_posts' => $select_posts,
+    ), 'edit_post', 'admin_layout');
+  }
+
+  //検索ページ
+  public function search_pageAction()
+  {
+    //管理者のセッション情報を取得する
+    $admin = $this->session->get('admin');
+
+    if (!$this->session->isAuthenticated() || empty($admin)) {
+      return $this->redirect('/admin/admin_login');
+    }
+
+    if ($this->request->isPost()) {
+      //削除処理
+      $delete = $this->request->getPost('delete');
+      if (isset($delete)) {
+
+        $post_id = $this->request->getPost('id');
+        $delete_image = $this->db_manager->get('Post')->fetchPostId($post_id);
+
+        //画像ファイルを削除
+        if ($delete_image['image'] != '') {
+          unlink('../web/uploaded_img/' . $delete_image['image']);
+        }
+
+        //投稿を削除
+        $this->db_manager->get('Post')->delete($post_id);
+
+        //コメントを削除
+        $this->db_manager->get('Comment')->deleteByPostId($post_id);
+        $message[] = '投稿を削除しました。';
+      }
+
+      $search_box = $this->request->getPost('search_box');
+      $search_btn = $this->request->getPost('search_btn');
+      $search_posts = array();
+
+      if (isset($search_box) || isset($search_btn)) {
+
+        //対象管理者の投稿を取得して表示する
+        if (empty($search_box)) {
+          $select_posts =  $this->db_manager->get('Post')->fetchAllPostByAdminId($admin['id']);
+        } else {
+          $select_posts =  $this->db_manager->get('Post')->fetchAllPostByInputWordsAndAdminId($admin['id'], $search_box);
+        }
+
+        if ($select_posts) {
+          while ($fetch_posts = current($select_posts)) {
+            $post_id = $fetch_posts['id'];
+            //コメントを取得
+            $total_post_comments = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
+
+            //いいねを取得
+            $total_post_likes = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
+
+            $search_posts[] = [
+              'post_id' => $post_id,
+              'image' => $fetch_posts['image'],
+              'status' => $fetch_posts['status'],
+              'title' => $fetch_posts['title'],
+              'content' => $fetch_posts['content'],
+              'total_post_comments' => $total_post_comments,
+              'total_post_likes' => $total_post_likes
+            ];
+            next($select_posts);
+          }
+        }
+      }
+    }
+    return $this->render(array(
+      'admin' => $admin,
+      'errors' => $message,
+      'search_posts' => $search_posts,
+    ), 'search_page', 'admin_layout');
+  }
 
 
   // プライベートでしか使用しないfunction ======================================================================

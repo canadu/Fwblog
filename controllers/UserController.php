@@ -12,18 +12,48 @@ class UserController extends Controller
 
     if (!empty($user)) {
       //ログインユーザーに関連する投稿を取得
-      $comments = $this->db_manager->get('Comment')->fetchAllCommentByUserId($user['user_id']);
-      $likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($user['user_id']);
+      $comments = $this->db_manager->get('Comment')->fetchAllCommentByUserId($user['id']);
+      $likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($user['id']);
     }
 
     //管理者アカウントを取得
     $select_authors = $this->db_manager->get('Admin')->fetchAllAdminLimit10();
+
+
+    $count_post_likes = array();
+    $count_post_comments = array();
+    $confirm_likes = array();
+
+    //カテゴリがActiveの投稿を取得
+    $select_posts = $this->db_manager->get('Post')->fetchByPostByStatus($this->application::ACTIVE_STATUS);
+
+    if (count($select_posts) > 0) {
+
+      foreach ($select_posts as $post) {
+
+        //記事が公開されている場合
+        $post_id = $post['id'];
+
+        //各投稿毎のいいねの件数を取得
+        $count_post_likes[] = $this->db_manager->get('Like')->fetchAllLikeByPostId($post_id);
+
+        //各投稿毎のコメントの件数を取得
+        $count_post_comments[] = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
+
+        //ユーザー毎のいいねをした投稿を取得
+        $confirm_likes[] = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['user_id'], $post_id);
+      }
+    }
 
     return $this->render(array(
       'user' => $user,
       'comments' => $comments,
       'likes' => $likes,
       'authors' => $select_authors,
+      'select_posts' => $select_posts,
+      'count_post_likes' => $count_post_likes,
+      'count_post_comments' => $count_post_comments,
+      'confirm_likes' => $confirm_likes,
       '_token' => $this->generateCsrfToken('user/sign_up'),
       'category' => $this->application::$category_array,
     ), 'home', 'user_layout');
@@ -460,11 +490,10 @@ class UserController extends Controller
       'count_post_likes' => $count_post_likes,
       'count_post_comments' => $count_post_comments,
       'confirm_likes' => $confirm_likes,
+      'category' => $this->application::$category_array,
       'errors' => $errors,
     ), 'posts', 'user_layout');
   }
-
-
 
   //投稿ページを表示
   public function view_postAction($params)
