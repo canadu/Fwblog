@@ -53,7 +53,7 @@
             <a href="<?php echo $base_url; ?>/user/sign_in" class="option-btn">ログイン</a>
             <a href="<?php echo $base_url; ?>/user/sign_up" class="option-btn">登録</a>
           </div>
-          <a href="components/user_logout.php" onclick="return confirm('サイトからログアウトしますか？');" class="delete-btn">ログアウト</a>
+          <a href="<?php echo $base_url; ?>/user/sign_out" onclick="return confirm('サイトからログアウトしますか？');" class="delete-btn">ログアウト</a>
         <?php else : ?>
           <p class="name">最初にログインしてください</p>
           <a href="<?php echo $base_url; ?>/user/sign_in" class="option-btn">ログイン</a>

@@ -68,6 +68,7 @@ class BlogApplication extends Application
       '/user/view_authors' => array('controller' => 'user', 'action' => 'view_authors'),
       '/user/:action' => array('controller' => 'user'),
       '/user/search_post' => array('controller' => 'search_post'),
+      '/user/sign_out' => array('controller' => 'sign_out'),
       '/admin/dashboard' => array('controller' => 'admin', 'action' => 'dashboard'),
       '/admin/admin_login' => array('controller' => 'admin', 'action' => 'admin_login'),
       '/admin/admin_register' => array('controller' => 'admin', 'action' => 'admin_register'),

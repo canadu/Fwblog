@@ -1,5 +1,6 @@
 <?php $this->setLayoutVar('title', 'ダッシュボード') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
 
 <?php $disp_category_count = 0; ?>
 

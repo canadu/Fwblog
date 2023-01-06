@@ -75,6 +75,15 @@ class UserController extends Controller
     ), 'signup', 'user_login_layout');
   }
 
+  //ログアウト
+  public function sign_outAction()
+  {
+    $this->session->clear();
+    $this->session->setAuthenticated(false);
+    return $this->redirect('/');
+  }
+
+
   //ユーザー更新
   public function update_user_infoAction()
   {
