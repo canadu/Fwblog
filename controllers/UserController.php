@@ -378,9 +378,9 @@ class UserController extends Controller
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    if (!$this->session->isAuthenticated() || empty($user)) {
-      return $this->redirect('/');
-    }
+    // if (!$this->session->isAuthenticated() || empty($user)) {
+    //   return $this->redirect('/');
+    // }
 
     $count_post_likes = array();
     $count_post_comments = array();
@@ -433,9 +433,9 @@ class UserController extends Controller
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    if (!$this->session->isAuthenticated() || empty($user)) {
-      return $this->redirect('/');
-    }
+    // if (!$this->session->isAuthenticated() || empty($user)) {
+    //   return $this->redirect('/');
+    // }
 
     // いいねをクリックした場合 =======================================================
     if ($this->request->isPost()) {
@@ -694,9 +694,9 @@ class UserController extends Controller
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    if (!$this->session->isAuthenticated() || empty($user)) {
-      return $this->redirect('/');
-    }
+    // if (!$this->session->isAuthenticated() || empty($user)) {
+    //   return $this->redirect('/');
+    // }
 
     // いいねをクリックした場合 =======================================================
     if ($this->request->isPost()) {
@@ -760,6 +760,7 @@ class UserController extends Controller
       'count_post_likes' => $count_post_likes,
       'count_post_comments' => $count_post_comments,
       'confirm_likes' => $confirm_likes,
+      'category' => $this->application::$category_array,
     ), 'author_posts', 'user_layout');
   }
 
