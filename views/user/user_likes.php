@@ -1,5 +1,6 @@
 <?php $this->setLayoutVar('title', 'いいねした投稿記事') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
 
 <section class="posts-container">
   <h1 class="heading">いいねした投稿記事</h1>

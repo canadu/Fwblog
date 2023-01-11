@@ -421,7 +421,11 @@ class UserController extends Controller
    */
   public function show_all_categoryAction()
   {
+    //セッションからユーザー情報を取得
+    $user = $this->session->get('user');
+
     return $this->render(array(
+      'user' => $user,
       'category' => $this->application::$category_array,
     ), 'show_all_category', 'user_layout');
   }
@@ -657,6 +661,9 @@ class UserController extends Controller
   public function view_authorsAction()
   {
 
+    //セッションからユーザー情報を取得
+    $user = $this->session->get('user');
+
     $count_admin_posts = array();
     $count_admin_likes = array();
     $count_admin_comments = array();
@@ -680,6 +687,7 @@ class UserController extends Controller
     }
 
     return $this->render(array(
+      'user' => $user,
       'select_author' => $select_authors,
       'count_admin_posts' => $count_admin_posts,
       'count_admin_likes' => $count_admin_likes,
@@ -756,6 +764,7 @@ class UserController extends Controller
     }
 
     return $this->render(array(
+      'user' => $user,
       'select_posts' => $select_posts,
       'count_post_likes' => $count_post_likes,
       'count_post_comments' => $count_post_comments,
@@ -939,8 +948,6 @@ class UserController extends Controller
     ), 'user_comments', 'user_layout');
   }
 
-
-
   public function search_postAction()
   {
 
@@ -1014,6 +1021,7 @@ class UserController extends Controller
     }
 
     return $this->render(array(
+      'user' => $user,
       'select_posts' => $select_posts,
       'count_post_likes' => $count_post_likes,
       'count_post_comments' => $count_post_comments,

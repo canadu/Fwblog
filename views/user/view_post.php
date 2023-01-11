@@ -1,5 +1,6 @@
 <?php $this->setLayoutVar('title', '投稿を見る') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
 
 <!-- 編集ボタンをクリックした際に表示されるブロック -->
 <?php if (count($select_edit_comment) > 0) : ?>
@@ -107,9 +108,10 @@
               <button type="submit" class="inline-delete-btn" name="delete_comment" onclick="return confirm('削除しますか?');">コメント削除</button>
             </form>
           <?php endif; ?>
-        <?php endforeach; ?>
-      <?php else : ?>
-        <?php echo '<p class="empty">まだコメントはまだありません。</p>'; ?>
-      <?php endif; ?>
         </div>
+      <?php endforeach; ?>
+    <?php else : ?>
+      <?php echo '<p class="empty">まだコメントはまだありません。</p>'; ?>
+    <?php endif; ?>
+  </div>
 </section>

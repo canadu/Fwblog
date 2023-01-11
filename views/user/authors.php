@@ -1,4 +1,6 @@
 <?php $this->setLayoutVar('title', '管理者一覧') ?>
+<?php $this->setLayoutVar('user', $user) ?>
+
 <section class="authors">
   <h1 class="heading">管理者</h1>
   <div class="box-container">

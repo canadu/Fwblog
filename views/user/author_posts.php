@@ -1,5 +1,7 @@
 <?php $this->setLayoutVar('title', '管理者投稿一覧') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
+
 <section class="posts-container">
   <div class="box-container">
     <?php

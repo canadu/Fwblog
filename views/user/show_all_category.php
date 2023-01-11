@@ -1,5 +1,6 @@
 <?php $this->setLayoutVar('title', 'カテゴリ') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
 
 <section class="categories">
   <h1 class="heading">投稿カテゴリー</h1>

@@ -1,5 +1,6 @@
 <?php $this->setLayoutVar('title', '最近の投稿') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
 
 <section class="posts-container">
   <h1 class="heading">最近の投稿</h1>

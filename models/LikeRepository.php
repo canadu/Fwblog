@@ -65,7 +65,7 @@ class LikeRepository extends DbRepository
   }
 
   /**
-   * ユーザーがいいねした投稿を取得
+   * ユーザーがいいねした投稿件数を取得
    */
   public function fetchCountLikeByUserIdPostId($user_id, $post_id)
   {

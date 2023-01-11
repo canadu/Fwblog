@@ -1,5 +1,7 @@
 <?php $this->setLayoutVar('title', '検索') ?>
 <?php $this->setLayoutVar('errors', $errors) ?>
+<?php $this->setLayoutVar('user', $user) ?>
+
 <?php if (!empty($select_posts)) {
 ?>
   <section class="posts-container">
