@@ -8,59 +8,55 @@ class AdminController extends Controller
     //セッションからユーザー情報を取得
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
     //管理者の投稿総数
     $select_posts = $this->db_manager->get('Post')->fetchAllPostByAdminId($admin['id']);
-    $number_of_posts = count($select_posts);
+    $count_posts = count($select_posts);
 
     //公開されている投稿
-    $number_of_active_posts = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($this->application::ACTIVE_STATUS, $admin['id']);
-    $number_of_active_posts = $number_of_active_posts['total'];
+    $count_active_posts = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($this->application::ACTIVE_STATUS, $admin['id']);
 
     //非公開な投稿
-    $number_of_deactive_posts = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($this->application::NON_ACTIVE_STATUS, $admin['id']);
-    $number_of_deactive_posts = $number_of_deactive_posts['total'];
+    $count_deactive_posts = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($this->application::NON_ACTIVE_STATUS, $admin['id']);
 
     //ユーザーアカウント
-    $select_users = $this->db_manager->get('User')->fetchAllUser;
-    $number_of_users = count($select_users);
+    $select_users = $this->db_manager->get('User')->fetchAllUser();
+    $count_users = count($select_users);
 
     //管理者アカウント
-    $select_admins = $this->db_manager->get('Admin')->fetchAllAdmin;
-    $number_of_admins = count($select_admins);
+    $select_admins = $this->db_manager->get('Admin')->fetchAllAdmin();
+    $count_admins = count($select_admins);
 
     //コメント
-    $select_comments = $this->db_manager->get('Comment')->fetchCountCommentByAdminId($admin['id']);
-    $number_of_comments = count($select_comments);
+    $count_comments = $this->db_manager->get('Comment')->fetchCountCommentByAdminId($admin['id']);
 
     //総いいね
-    $select_likes = $this->db_manager->get('Like')->fetchCountLikeByAdminId($admin['id']);
-    $number_of_likes = count($select_likes);
+    $count_likes = $this->db_manager->get('Like')->fetchCountLikeByAdminId($admin['id']);
 
     return $this->render(array(
       'admin' => $admin,
-      'number_of_posts' => $number_of_posts,
-      'number_of_active_posts' => $number_of_active_posts,
-      'number_of_deactive_posts' => $number_of_deactive_posts,
-      'number_of_users' => $number_of_users,
-      'number_of_admins' => $number_of_admins,
-      'number_of_comments' => $number_of_comments,
-      'number_of_likes' => $number_of_likes,
+      'count_posts' => $count_posts,
+      'count_active_posts' => $count_active_posts['total'],
+      'count_deactive_posts' => $count_deactive_posts['total'],
+      'count_users' => $count_users,
+      'count_admins' => $count_admins,
+      'count_comments' => $count_comments['total'],
+      'count_likes' => $count_likes['total'],
     ), 'dashboard', 'admin_layout');
   }
 
-  //管理者登録
-  public function signupAction()
-  {
-    return $this->render(array(
-      'name' => '',
-      'password' => '',
-      '_token' => $this->generateCsrfToken('account/signup'),
-    ));
-  }
+  // //管理者登録
+  // public function signupAction()
+  // {
+  //   return $this->render(array(
+  //     'name' => '',
+  //     'password' => '',
+  //     '_token' => $this->generateCsrfToken('account/signup'),
+  //   ));
+  // }
 
   //新規投稿
   public function add_postsAction()
@@ -68,7 +64,7 @@ class AdminController extends Controller
     //セッションからユーザー情報を取得
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -90,6 +86,7 @@ class AdminController extends Controller
     }
     return $this->render(array(
       'admin' => $admin,
+      'category' => $this->application::$category_array,
       'errors' => $message,
     ), 'add_posts', 'admin_layout');
   }
@@ -98,7 +95,7 @@ class AdminController extends Controller
   public function admin_loginAction()
   {
     //アクセスチェック
-    if ($this->session->isAuthenticated()) {
+    if ($this->session->isAdminAuthenticated()) {
       //ログインしている場合は、ダッシュボードに移動する
       return $this->redirect('/admin/dashboard');
     }
@@ -137,7 +134,7 @@ class AdminController extends Controller
           $errors[] = 'ユーザー名かパスワードが不正です。';
         } else {
           //ログイン状態の制御
-          $this->session->setAuthenticated(true);
+          $this->session->setAdminAuthenticated(true);
           //DBから取得した管理者情報をセッションにセット
           $this->session->set('admin', $admin);
           //ダッシュボードのページへリダイレクト
@@ -159,9 +156,9 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    // if ($this->session->isAuthenticated() || !empty($admin)) {
-    //   return $this->redirect('/admin/admin_login');
-    // }
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
+      return $this->redirect('/admin/admin_login');
+    }
 
     $name = '';
     $message = array();
@@ -217,8 +214,11 @@ class AdminController extends Controller
             //レコードの取得
             $admin = $this->db_manager->get('Admin')->fetchByUserName($name);
 
+            //一回ログアウトしてから再ログインを行う
+            $this->logout();
+
             //ログイン状態の制御
-            $this->session->setAuthenticated(true);
+            $this->session->setAdminAuthenticated(true);
 
             //セッションにユーザー情報を格納
             $this->session->set('admin', $admin);
@@ -245,7 +245,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -269,6 +269,10 @@ class AdminController extends Controller
         } else {
           //ユーザー情報の更新
           $this->db_manager->get('Admin')->updateName($admin['id'], $name);
+
+          //管理者名の更新
+          $this->db_manager->get('Post')->updateName($admin['id'], $name);
+
           $message[] = 'ユーザー名を更新しました。';
           $updateFg = true;
         }
@@ -314,10 +318,10 @@ class AdminController extends Controller
   public function admin_logoutAction()
   {
     //セッションをクリア
-    $this->session->clear();
-    $this->session->setAuthenticated(false);
+    $this->logout();
     return $this->redirect('/admin/admin_login');
   }
+
 
   public function view_postsAction($params)
   {
@@ -325,7 +329,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -390,7 +394,6 @@ class AdminController extends Controller
     return $this->render(array(
       'errors' => $message,
       'admin' => $admin,
-      'select_posts' => $select_posts,
       'view_posts' => $view_posts,
     ), 'view_posts', 'admin_layout');
   }
@@ -400,7 +403,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -490,7 +493,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -554,7 +557,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -604,7 +607,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -645,7 +648,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -744,7 +747,7 @@ class AdminController extends Controller
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
-    if (!$this->session->isAuthenticated() || empty($admin)) {
+    if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
     }
 
@@ -814,6 +817,12 @@ class AdminController extends Controller
 
 
   // プライベートでしか使用しないfunction ======================================================================
+  private function logout()
+  {
+    $this->session->clear();
+    $this->session->setAdminAuthenticated(false);
+  }
+
   private function Post($id, $param_status)
   {
     global $message;

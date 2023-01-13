@@ -45,7 +45,7 @@
           </div>
 
           <?php if ($post['image'] != '') : ?>
-            <img src="../uploaded_img/<?php echo $post['image']; ?>" class="post-image" alt="">
+            <img src="../../uploaded_img/<?php echo $post['image']; ?>" class="post-image" alt="">
           <?php endif; ?>
 
           <div class="post-title"><?php echo $post['title']; ?></div>
@@ -73,14 +73,14 @@
       <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
       <input type="hidden" name="admin_id" value="<?php echo $select_admin_id['admin_id']; ?>">
       <input type="hidden" name="user_name" value="<?php echo $user['name']; ?>">
-      <p class="user"><i class="fas fa-user"></i><a href="<?php echo $base_url; ?>/user/sign_up"><?php echo $user['name']; ?></a></p>
+      <p class="user"><i class="fas fa-user"></i><a href="<?php echo $base_url; ?>/user/user_register"><?php echo $user['name']; ?></a></p>
       <textarea name="comment" maxlength="1000" class="comment-box" cols="30" rows="10" placeholder="コメントを入力してください。" required></textarea>
       <input type="submit" value="コメントを追加" class="inline-btn" name="add_comment">
     </form>
   <?php else : ?>
     <div class="add-comment">
       <p>追加、編集するにはログインしてください</p>
-      <a href="<?php echo $base_url; ?>/user/sign_in" class="inline-btn">ログイン</a>
+      <a href="<?php echo $base_url; ?>/user/user_login" class="inline-btn">ログイン</a>
     </div>
   <?php endif; ?>
   <p class="comment-title">コメントを投稿</p>

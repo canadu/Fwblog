@@ -33,7 +33,7 @@
             </div>
           </div>
           <?php if ($post['image'] != '') : ?>
-            <img src="uploaded_img/<?php echo $post['image']; ?>" class="post-image" alt="">
+            <img src="../../uploaded_img/<?php echo $post['image']; ?>" class="post-image" alt="">
           <?php endif; ?>
           <div class="post-title"><?php echo $post['title']; ?></div>
           <div class="post-content content-150"><?php echo $post['content']; ?></div>

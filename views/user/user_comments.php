@@ -1,7 +1,7 @@
 <?php
 $this->setLayoutVar('title', 'コメントした投稿記事');
 $this->setLayoutVar('errors', $errors);
-
+$this->setLayoutVar('user', $user);
 ?>
 
 <?php if (count($select_edit_comment) > 0) : ?>

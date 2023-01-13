@@ -168,4 +168,14 @@ class PostRepository extends DbRepository
       ':id' => $id,
     ));
   }
+
+  // 投稿者名を更新する
+  public function updateName($admin_id, $name)
+  {
+    $sql = "UPDATE posts SET name = :name WHERE admin_id = :admin_id";
+    $stmt = $this->execute($sql, array(
+      ':admin_id' => $admin_id,
+      ':name' => $name,
+    ));
+  }
 }

@@ -68,4 +68,21 @@ class Session
   {
     return $this->get('_authenticated', false);
   }
+
+  /**
+   * ログイン状態の制御
+   */
+  public function setAdminAuthenticated($bool)
+  {
+    $this->set('_admin_authenticated', (bool)$bool);
+    $this->regenerate();
+  }
+
+  /**
+   * _authenticatedというキーでログインしているかどうかの判定を行う
+   */
+  public function isAdminAuthenticated()
+  {
+    return $this->get('_admin_authenticated', false);
+  }
 }

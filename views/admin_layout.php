@@ -16,7 +16,7 @@
   <?php endif; ?>
   <!-- ナビゲーションメニュー -->
   <header class="header">
-    <a href="<?php echo $base_url; ?>/admin/dashboard" class="logo">Admin<span>Panel</span></a>
+    <a href="<?php echo $base_url; ?>/admin/dashboard" class="logo"><span>管理者Panel</span></a>
     <div class="profile">
       <p><?php echo $admin['name']; ?></p>
       <a href="<?php echo $base_url; ?>/admin/update_profile" class="btn">プロフィールを更新</a>

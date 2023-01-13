@@ -40,23 +40,23 @@
         <a href="<?php echo $base_url; ?>/user/posts"><i class="fas fa-angle-right"></i>投稿</a>
         <a href="<?php echo $base_url; ?>/user/show_all_category"><i class="fas fa-angle-right"></i>カテゴリ</a>
         <a href="<?php echo $base_url; ?>/user/view_authors"><i class="fas fa-angle-right"></i>管理者一覧</a>
-        <a href="<?php echo $base_url; ?>/user/sign_in"><i class="fas fa-angle-right"></i>ユーザーログイン</a>
-        <a href="<?php echo $base_url; ?>/user/sign_up"><i class="fas fa-angle-right"></i>ユーザー登録</a>
+        <a href="<?php echo $base_url; ?>/user/user_login"><i class="fas fa-angle-right"></i>ユーザーログイン</a>
+        <a href="<?php echo $base_url; ?>/user/user_register"><i class="fas fa-angle-right"></i>ユーザー登録</a>
       </nav>
 
       <!-- user-btnをクリックした際に表示 -->
       <div class="profile">
         <?php if (isset($user)) : ?>
           <p class="name"><?php echo $user['name']; ?></p>
-          <a href="<?php echo $base_url; ?>/user/update_user_info" class="btn">プロフィールを更新</a>
+          <a href="<?php echo $base_url; ?>/user/update_user" class="btn">プロフィールを更新</a>
           <div class="flex-btn">
-            <a href="<?php echo $base_url; ?>/user/sign_in" class="option-btn">ログイン</a>
-            <a href="<?php echo $base_url; ?>/user/sign_up" class="option-btn">登録</a>
+            <a href="<?php echo $base_url; ?>/user/user_login" class="option-btn">ログイン</a>
+            <a href="<?php echo $base_url; ?>/user/user_register" class="option-btn">登録</a>
           </div>
-          <a href="<?php echo $base_url; ?>/user/sign_out" onclick="return confirm('サイトからログアウトしますか？');" class="delete-btn">ログアウト</a>
+          <a href="<?php echo $base_url; ?>/user/user_logout" onclick="return confirm('サイトからログアウトしますか？');" class="delete-btn">ログアウト</a>
         <?php else : ?>
           <p class="name">最初にログインしてください</p>
-          <a href="<?php echo $base_url; ?>/user/sign_in" class="option-btn">ログイン</a>
+          <a href="<?php echo $base_url; ?>/user/user_login" class="option-btn">ログイン</a>
         <?php endif; ?>
       </div>
 

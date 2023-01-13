@@ -15,7 +15,7 @@
         <p>Welcome <span><?php echo $user['name']; ?></span></p>
         <p>総コメント : <span><?php echo count($comments); ?></span></p>
         <p>総いいね : <span><?php echo count($likes); ?></span></p>
-        <a href="<?php echo $base_url; ?>/user/update_user_info" class="btn">プロフィールを更新</a>
+        <a href="<?php echo $base_url; ?>/user/update_user" class="btn">プロフィールを更新</a>
         <div class="flex-btn">
           <a href="<?php echo $base_url; ?>/user/user_likes" class="option-btn">いいね</a>
           <a href="<?php echo $base_url; ?>/user/user_comments" class="option-btn">コメント</a>
@@ -23,8 +23,8 @@
       <?php else : ?>
         <p class="name">ログイン or 登録</p>
         <div class="flex-btn">
-          <a href="<?php echo $base_url; ?>/user/sign_in" class="option-btn">ログイン</a>
-          <a href="<?php echo $base_url; ?>/user/sign_up" class="option-btn">登録</a>
+          <a href="<?php echo $base_url; ?>/user/user_login" class="option-btn">ログイン</a>
+          <a href="<?php echo $base_url; ?>/user/user_register" class="option-btn">登録</a>
         </div>
       <?php endif; ?>
     </div>
@@ -47,7 +47,7 @@
     <div class="box">
       <p>管理者</p>
       <div class="flex-box">
-        <?php if (count($$select_authors) > 0) : ?>
+        <?php if (count($select_authors) > 0) : ?>
           <?php foreach ($select_authors as $author) : ?>
             <a href="<?php echo $base_url; ?>/user/author_posts/<?php echo $author['name']; ?>" class="links"><?php echo $author['name']; ?></a>
           <?php endforeach; ?>
@@ -69,6 +69,11 @@
 
         foreach ($select_posts as $post) {
 
+          if ($idx == 5) {
+            //最近の投稿は5件ぐらいまで表示する
+            break;
+          }
+
           //記事が公開されている場合
           $post_id = $post['id'];
 
@@ -78,6 +83,14 @@
           //各投稿毎のコメントの件数を取得
           $total_post_comments = count($count_post_comments[$idx]);
 
+          if (array_key_exists('id', $confirm_likes[$idx])) {
+            //ログインしているユーザーがいいねしている
+            $confirm_like = true;
+          } else {
+            // していない
+            $confirm_like = false;
+          }
+
       ?>
           <form method="post" class="box">
             <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
@@ -86,7 +99,7 @@
             <div class="post-admin">
               <i class="fas fa-user"></i>
               <div>
-                <a href="author_posts.php?author=<?php echo $post['name']; ?>"><?php echo $post['name']; ?></a>
+                <a href="<?php echo $base_url; ?>/user/author_posts/<?php echo $post['name']; ?>"><?php echo $post['name']; ?></a>
                 <div><?php echo $post['date']; ?></div>
               </div>
             </div>
@@ -101,7 +114,7 @@
             <a href="<?php echo $base_url; ?>/user/category/<?php echo $post['category']; ?>" class="post-cat"> <i class="fas fa-tag"></i> <span><?= $category[$post['category']]; ?></span></a>
             <div class="icons">
               <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_comments; ?>)</span></a>
-              <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($total_post_likes > 0 and $user['id'] != '') {
+              <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($confirm_like == true  and $user['id'] != '') {
                                                                                       echo 'color:red;';
                                                                                     }; ?>"></i><span>(<?= $total_post_likes; ?>)</span></button>
             </div>

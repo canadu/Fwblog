@@ -1,13 +1,18 @@
 let header = document.querySelector('.header');
 
-
-document.querySelector('#menu-btn').onclick = () => {
-    header.classList.toggle('active');
+const menu_btn = document.querySelector('#menu-btn')
+if (menu_btn) {
+    menu_btn.addEventListener('click', () => {
+        header.classList.toggle('active');
+    })
 }
 
-
 window.onscroll = () => {
-    header.classList.remove('active');
+    if (header != null) {
+        if (header.classList.contains('active')) {
+            header.classList.remove('active');
+        }
+    }
 }
 
 document.querySelectorAll('.posts-content').forEach(content => {

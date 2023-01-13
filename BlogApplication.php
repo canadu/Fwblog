@@ -54,9 +54,9 @@ class BlogApplication extends Application
   {
     return array(
       '/' => array('controller' => 'user', 'action' => 'index'),
-      '/user/sign_in' => array('controller' => 'user', 'action' => 'sign_in'),
-      '/user/sign_up' => array('controller' => 'user', 'action' => 'sign_up'),
-      '/user/update_user_info' => array('controller' => 'user', 'action' => 'update_user_info'),
+      '/user/user_login' => array('controller' => 'user', 'action' => 'user_login'),
+      '/user/user_register' => array('controller' => 'user', 'action' => 'user_register'),
+      '/user/update_user' => array('controller' => 'user', 'action' => 'update_user'),
       '/user/category/:key' => array('controller' => 'user', 'action' => 'show_category'),
       '/user/all_category' => array('controller' => 'user', 'action' => 'show_all_category'),
       '/user/author_posts/:name' => array('controller' => 'user', 'action' => 'author_posts'),
@@ -68,7 +68,7 @@ class BlogApplication extends Application
       '/user/view_authors' => array('controller' => 'user', 'action' => 'view_authors'),
       '/user/:action' => array('controller' => 'user'),
       '/user/search_post' => array('controller' => 'search_post'),
-      '/user/sign_out' => array('controller' => 'sign_out'),
+      '/user/user_logout' => array('controller' => 'user_logout'),
       '/admin/dashboard' => array('controller' => 'admin', 'action' => 'dashboard'),
       '/admin/admin_login' => array('controller' => 'admin', 'action' => 'admin_login'),
       '/admin/admin_register' => array('controller' => 'admin', 'action' => 'admin_register'),
