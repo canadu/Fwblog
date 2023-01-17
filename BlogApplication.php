@@ -14,7 +14,6 @@ class BlogApplication extends Application
   const ACTIVE_STATUS = 'active';
   const NON_ACTIVE_STATUS = 'deactive';
   const MAX_IMAGE_FILE_SIZE = 2097152;
-
   protected $login_action = array('account', 'signin');
 
   public static $category_array = array(

@@ -258,6 +258,7 @@ class AdminController extends Controller
 
       //ユーザー名の取得
       $name = $this->request->getPost('name');
+
       if (!empty($name)) {
         // レコードの登録
         $adminUser = $this->db_manager->get('Admin')->fetchByUserName($name);

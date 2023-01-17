@@ -19,7 +19,7 @@
           <div class="post-admin">
             <i class="fas fa-user"></i>
             <div>
-              <a href="author_posts.php?author=<?php echo $post['name']; ?>"><?php echo $post['name']; ?></a>
+              <a href="<?php echo $base_url; ?>/user/author_posts/<?php echo $post_id; ?>"><?php echo $post['name']; ?></a>
               <div><?php echo $post['date']; ?></div>
             </div>
           </div>
