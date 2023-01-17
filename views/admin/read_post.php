@@ -15,13 +15,13 @@
                                                       echo '#6C757D';
                                                     }; ?>;"><?= $post_data['status'] == 'active' ? '公開' : '非公開'; ?></div>
         <?php if ($post_data['image'] != '') { ?>
-          <img src="../uploaded_img/<?php echo $post_data['image']; ?>" class="image" alt="">
+          <img src="../../uploaded_img/<?php echo $post_data['image']; ?>" class="image" alt="">
         <?php } ?>
         <div class="title"><?= $post_data['title']; ?></div>
         <div class="content"><?php echo $post_data['content']; ?></div>
         <div class="icons">
-          <div class="likes"><i class="fas fa-heart"></i><span><?php echo $post_data['total_post_likes']['total']; ?></span></div>
           <div class="comments"><i class="fas fa-comments"></i><span><?php echo $post_data['total_post_comments']['total']; ?></span></div>
+          <div class="likes"><i class="fas fa-heart"></i><span><?php echo $post_data['total_post_likes']['total']; ?></span></div>
         </div>
         <div class="flex-btn">
           <a href="<?php echo $base_url; ?>/admin/edit_post/<?php echo $post_id; ?>" class="inline-option-btn">編集</a>
@@ -43,8 +43,8 @@
   <p class="comment-title">投稿コメント</p>
   <div class="box-container">
     <?php
-    if (($select_comments) && !empty($select_comments)) {
-      foreach ($comments as $comment) {
+    if (count($comments) > 0) {
+      while ($comment = current($comments)) {
     ?>
         <div class="box">
           <div class="user">
@@ -61,6 +61,7 @@
           </form>
         </div>
     <?php
+        next($comments);
       }
     } else {
       echo '<p class="empty">まだコメントはありません</p>';

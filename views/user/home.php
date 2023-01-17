@@ -30,44 +30,45 @@
     </div>
 
     <!-- カテゴリを取得 -->
-    <div class="box">
-      <p>カテゴリー</p>
-      <div class="flex-box">
-        <?php foreach ($category as $key => $value) : ?>
-          <?php if ($disp_category_count < 5) : ?>
-            <a href="<?php echo $base_url; ?>/user/category/<?php echo $key; ?>" class="links"><?php echo $value; ?></a>
-          <?php endif; ?>
-          <?php $disp_category_count++; ?>
-        <?php endforeach; ?>
-        <a href="<?php echo $base_url; ?>/user/show_all_category" class="btn">全て見る</a>
-      </div>
-    </div>
-
-    <!-- 管理者アカウントを取得 -->
-    <div class="box">
-      <p>管理者</p>
-      <div class="flex-box">
-        <?php if (count($select_authors) > 0) : ?>
-          <?php foreach ($select_authors as $author) : ?>
-            <a href="<?php echo $base_url; ?>/user/author_posts/<?php echo $author['name']; ?>" class="links"><?php echo $author['name']; ?></a>
+    <?php if (count($all_active_posts) > 0) : ?>
+      <div class="box">
+        <p>カテゴリー</p>
+        <div class="flex-box">
+          <?php foreach ($category as $key => $value) : ?>
+            <?php if ($disp_category_count < 5) : ?>
+              <a href="<?php echo $base_url; ?>/user/category/<?php echo $key; ?>" class="links"><?php echo $value; ?></a>
+            <?php endif; ?>
+            <?php $disp_category_count++; ?>
           <?php endforeach; ?>
-        <?php else : ?>
-          <?php echo '<p class="empty">まだ投稿はありません。</p>'; ?>
-        <?php endif; ?>
-        <a href="<?php echo $base_url; ?>/user/authors" class="btn">全て見る</a>
+          <a href="<?php echo $base_url; ?>/user/show_all_category" class="btn">全て見る</a>
+        </div>
       </div>
-    </div>
 
+      <!-- 管理者アカウントを取得 -->
+      <div class="box">
+        <p>管理者</p>
+        <div class="flex-box">
+          <?php if (count($select_authors) > 0) : ?>
+            <?php foreach ($select_authors as $author) : ?>
+              <a href="<?php echo $base_url; ?>/user/author_posts/<?php echo $author['name']; ?>" class="links"><?php echo $author['name']; ?></a>
+            <?php endforeach; ?>
+          <?php else : ?>
+            <?php echo '<p class="empty">まだ投稿はありません。</p>'; ?>
+          <?php endif; ?>
+          <a href="<?php echo $base_url; ?>/user/authors" class="btn">全て見る</a>
+        </div>
+      </div>
+    <?php endif; ?>
   </div>
   <section class="posts-container">
     <h1 class="heading">最近の投稿</h1>
     <div class="box-container">
       <?php
-      if (count($select_posts) > 0) {
+      if (count($all_active_posts) > 0) {
 
         $idx = 0;
 
-        foreach ($select_posts as $post) {
+        foreach ($all_active_posts as $post) {
 
           if ($idx == 5) {
             //最近の投稿は5件ぐらいまで表示する
@@ -77,24 +78,11 @@
           //記事が公開されている場合
           $post_id = $post['id'];
 
-          //各投稿毎のいいねの件数を取得
-          $total_post_likes = count($count_post_likes[$idx]);
-
-          //各投稿毎のコメントの件数を取得
-          $total_post_comments = count($count_post_comments[$idx]);
-
-          if (array_key_exists('id', $confirm_likes[$idx])) {
-            //ログインしているユーザーがいいねしている
-            $confirm_like = true;
-          } else {
-            // していない
-            $confirm_like = false;
-          }
-
       ?>
           <form method="post" class="box">
             <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
             <input type="hidden" name="admin_id" value="<?php echo $post['admin_id']; ?>">
+            <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
 
             <div class="post-admin">
               <i class="fas fa-user"></i>
@@ -113,10 +101,10 @@
             <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>" class="inline-btn">もっと見る</a>
             <a href="<?php echo $base_url; ?>/user/category/<?php echo $post['category']; ?>" class="post-cat"> <i class="fas fa-tag"></i> <span><?= $category[$post['category']]; ?></span></a>
             <div class="icons">
-              <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_comments; ?>)</span></a>
-              <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($confirm_like == true  and $user['id'] != '') {
+              <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>"><i class="fas fa-comment"></i><span>(<?php echo $post['count_post_comment']; ?>)</span></a>
+              <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($post['confirm_like'] > 0  and $user['id'] != '') {
                                                                                       echo 'color:red;';
-                                                                                    }; ?>"></i><span>(<?= $total_post_likes; ?>)</span></button>
+                                                                                    }; ?>"></i><span>(<?= $post['count_post_like']; ?>)</span></button>
             </div>
           </form>
       <?php
@@ -127,7 +115,9 @@
       }
       ?>
     </div>
-    <div class="more-btn" style="text-align: center; margin-top:1rem;">
-      <a href="<?php echo $base_url; ?>/user/posts" class="inline-btn">すべての投稿を見る</a>
-    </div>
+    <?php if (count($all_active_posts) > 0) : ?>
+      <div class="more-btn" style="text-align: center; margin-top:1rem;">
+        <a href="<?php echo $base_url; ?>/user/posts" class="inline-btn">すべての投稿を見る</a>
+      </div>
+    <?php endif; ?>
   </section>

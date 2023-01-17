@@ -13,7 +13,7 @@ class PostRepository extends DbRepository
   /**
    * 投稿カテゴリー毎のデータを取得する
    */
-  public function fetchByPostByStatus($status)
+  public function fetchAllByPostByStatus($status)
   {
     $sql = "SELECT * FROM posts WHERE status = :status";
     return $this->fetchAll($sql, array(':status' => $status));
@@ -78,7 +78,7 @@ class PostRepository extends DbRepository
   public function fetchAllPostByInputWords($input_word, $status)
   {
     $input_word = "%" . $input_word . "%";
-    $sql = "SELECT * FROM posts WHERE title LIKE :input_word OR category LIKE :input_word2 AND status = :status";
+    $sql = "SELECT * FROM posts WHERE (title LIKE :input_word OR category LIKE :input_word2) AND status = :status";
     return $this->fetchAll($sql, array(':input_word' => $input_word, ':input_word2' => $input_word, ':status' => $status));
   }
 

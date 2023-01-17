@@ -1,11 +1,22 @@
 <?php
 class UserController extends Controller
 {
-
   public function indexAction()
   {
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
+
+    if ($this->request->isPost()) {
+
+      //CSRFトークンは正しいか
+      $token = $this->request->getPost('_token');
+      if (!$this->checkCsrfToken('user/home', $token)) {
+        return $this->redirect('/');
+      }
+
+      //いいねをクリックした場合
+      $errors = $this->like_action($user);
+    }
 
     $comments = array();
     $likes = array();
@@ -16,36 +27,35 @@ class UserController extends Controller
       $likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($user['id']);
     }
 
-    if ($this->request->isPost()) {
-      //いいねをクリックした場合
-      $errors = $this->like_action($user);
-    }
-
     //管理者アカウントを取得
     $select_authors = $this->db_manager->get('Admin')->fetchAllAdminLimit10();
 
-    $count_post_likes = array();
-    $count_post_comments = array();
-    $confirm_likes = array();
-
     //カテゴリがActiveの投稿を取得
-    $select_posts = $this->db_manager->get('Post')->fetchByPostByStatus($this->application::ACTIVE_STATUS);
+    $all_active_posts = $this->db_manager->get('Post')->fetchAllByPostByStatus($this->application::ACTIVE_STATUS);
 
-    if (count($select_posts) > 0) {
+    if ($all_active_posts) {
 
-      foreach ($select_posts as $post) {
+      $idx = 0;
+
+      foreach ($all_active_posts as $post) {
 
         //記事が公開されている場合
         $post_id = $post['id'];
 
         //各投稿毎のいいねの件数を取得
-        $count_post_likes[] = $this->db_manager->get('Like')->fetchAllLikeByPostId($post_id);
+        $count_post_like = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
 
         //各投稿毎のコメントの件数を取得
-        $count_post_comments[] = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
+        $count_post_comment = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
         //ユーザー毎のいいねをした投稿を取得
-        $confirm_likes[] = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['id'], $post_id);
+        $confirm_like = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+
+        $all_active_posts[$idx]['count_post_like'] = $count_post_like['total'];
+        $all_active_posts[$idx]['count_post_comment'] = $count_post_comment['total'];
+        $all_active_posts[$idx]['confirm_like'] = $confirm_like['total'];
+
+        $idx++;
       }
     }
 
@@ -55,11 +65,8 @@ class UserController extends Controller
       'errors' => $errors,
       'likes' => $likes,
       'select_authors' => $select_authors,
-      'select_posts' => $select_posts,
-      'count_post_likes' => $count_post_likes,
-      'count_post_comments' => $count_post_comments,
-      'confirm_likes' => $confirm_likes,
-      '_token' => $this->generateCsrfToken('user/user_register'),
+      'all_active_posts' => $all_active_posts,
+      '_token' => $this->generateCsrfToken('user/home'),
       'category' => $this->application::$category_array,
     ), 'home', 'user_layout');
   }
@@ -367,41 +374,38 @@ class UserController extends Controller
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    // if (!$this->session->isAuthenticated() || empty($user)) {
-    //   return $this->redirect('/');
-    // }
-
-    $count_post_likes = array();
-    $count_post_comments = array();
-    $confirm_likes = array();
-
     //カテゴリー毎の投稿を取得
-    $select_posts = $this->db_manager->get('Post')->fetchByPostByCategory($params['key'], $this->application::ACTIVE_STATUS);
+    $category_posts = $this->db_manager->get('Post')->fetchByPostByCategory($params['key'], $this->application::ACTIVE_STATUS);
 
-    if (count($select_posts) > 0) {
+    if ($category_posts) {
 
-      foreach ($select_posts as $post) {
+      $idx = 0;
+
+      foreach ($category_posts as $post) {
 
         //記事が公開されている場合
         $post_id = $post['id'];
 
         //各投稿毎のいいねの件数を取得
-        $count_post_likes[] = $this->db_manager->get('Like')->fetchAllLikeByPostId($post_id);
+        $count_post_like = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
 
         //各投稿毎のコメントの件数を取得
-        $count_post_comments[] = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
+        $count_post_comment = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
         //ユーザー毎のいいねをした投稿を取得
-        $confirm_likes[] = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['user_id'], $post_id);
+        $confirm_like = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+
+        $category_posts[$idx]['count_post_like'] = $count_post_like['total'];
+        $category_posts[$idx]['count_post_comment'] = $count_post_comment['total'];
+        $category_posts[$idx]['confirm_like'] = $confirm_like['total'];
+
+        $idx++;
       }
     }
 
     return $this->render(array(
       'user' => $user,
-      'select_posts' => $select_posts,
-      'count_post_likes' => $count_post_likes,
-      'count_post_comments' => $count_post_comments,
-      'confirm_likes' => $confirm_likes,
+      'category_posts' => $category_posts,
     ), 'show_category', 'user_layout');
   }
 
@@ -426,47 +430,52 @@ class UserController extends Controller
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    // if (!$this->session->isAuthenticated() || empty($user)) {
-    //   return $this->redirect('/');
-    // }
-
     if ($this->request->isPost()) {
+
+      //CSRFトークンは正しいか?
+      $token = $this->request->getPost('_token');
+      if (!$this->checkCsrfToken('user/posts', $token)) {
+        return $this->redirect('/user/posts');
+      }
+
       //いいねをクリックした場合
       $errors = $this->like_action($user);
     }
 
-    $count_post_likes = array();
-    $count_post_comments = array();
-    $confirm_likes = array();
-
     //カテゴリがActiveの投稿を取得
-    $select_posts = $this->db_manager->get('Post')->fetchByPostByStatus($this->application::ACTIVE_STATUS);
+    $all_active_posts = $this->db_manager->get('Post')->fetchAllByPostByStatus($this->application::ACTIVE_STATUS);
 
-    if (count($select_posts) > 0) {
+    if ($all_active_posts) {
 
-      foreach ($select_posts as $post) {
+      $idx = 0;
+
+      foreach ($all_active_posts as $post) {
 
         //記事が公開されている場合
         $post_id = $post['id'];
 
         //各投稿毎のいいねの件数を取得
-        $count_post_likes[] = $this->db_manager->get('Like')->fetchAllLikeByPostId($post_id);
+        $count_post_like = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
 
         //各投稿毎のコメントの件数を取得
-        $count_post_comments[] = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
+        $count_post_comment = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
         //ユーザー毎のいいねをした投稿を取得
-        $confirm_likes[] = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['user_id'], $post_id);
+        $confirm_like = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+
+        $all_active_posts[$idx]['count_post_like'] = $count_post_like['total'];
+        $all_active_posts[$idx]['count_post_comment'] = $count_post_comment['total'];
+        $all_active_posts[$idx]['confirm_like'] = $confirm_like['total'];
+
+        $idx++;
       }
     }
 
     return $this->render(array(
       'user' => $user,
-      'select_posts' => $select_posts,
-      'count_post_likes' => $count_post_likes,
-      'count_post_comments' => $count_post_comments,
-      'confirm_likes' => $confirm_likes,
+      'all_active_posts' => $all_active_posts,
       'category' => $this->application::$category_array,
+      '_token' => $this->generateCsrfToken('user/posts'),
       'errors' => $errors,
     ), 'posts', 'user_layout');
   }
@@ -478,10 +487,6 @@ class UserController extends Controller
     $user = $this->session->get('user');
 
     $post_id = $params['id'];
-
-    $count_post_likes = array();
-    $count_post_comments = array();
-    $confirm_likes = array();
 
     if ($this->request->isPost()) {
 
@@ -548,30 +553,25 @@ class UserController extends Controller
       };
     }
 
-
     //カテゴリがActiveの投稿を取得
     $select_posts = $this->db_manager->get('Post')->fetchAllByPostByStatusAndId($this->application::ACTIVE_STATUS, $post_id);
 
-    if (count($select_posts) > 0) {
+    if ($select_posts) {
 
-      foreach ($select_posts as $post) {
+      //各投稿毎のいいねの件数を取得
+      $count_post_like = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
 
-        //記事が公開されている場合
-        // $post_id = $post['id'];
+      //各投稿毎のコメントの件数を取得
+      $count_post_comment = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
-        //各投稿毎のいいねの件数を取得
-        $count_post_likes[] = $this->db_manager->get('Like')->fetchAllLikeByPostId($post_id);
+      //ユーザー毎のいいねをした投稿を取得
+      $confirm_like = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
 
-        //各投稿毎のコメントの件数を取得
-        $count_post_comments[] = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
-
-        //ユーザー毎のいいねをした投稿を取得
-        $confirm_likes[] = $this->db_manager->get('Like')->fetchLikeByUserIdPostId($user['user_id'], $post_id);
-      }
+      //連想配列に取得した値を追加
+      $select_posts[0]['count_post_like'] = $count_post_like['total'];
+      $select_posts[0]['count_post_comment'] = $count_post_comment['total'];
+      $select_posts[0]['confirm_like'] = $confirm_like['total'];
     }
-
-    //投稿を取得
-    $select_admin_id = $this->db_manager->get('Post')->fetchPostId($post_id);
 
     //投稿毎のコメントを取得
     $select_comments = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
@@ -583,10 +583,6 @@ class UserController extends Controller
       '_token' => $this->generateCsrfToken('user/view_post'),
       'select_edit_comment' => $select_edit_comment,
       'select_posts' => $select_posts,
-      'count_post_likes' => $count_post_likes,
-      'count_post_comments' => $count_post_comments,
-      'confirm_likes' => $confirm_likes,
-      'select_admin_id' => $select_admin_id,
       'select_comments' => $select_comments,
       'errors' => $errors,
     ), 'view_post', 'user_layout');
@@ -595,51 +591,48 @@ class UserController extends Controller
   //管理者一覧ページを表示
   public function view_authorsAction()
   {
-
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    $count_admin_posts = array();
-    $count_admin_likes = array();
-    $count_admin_comments = array();
-
     //カテゴリがActiveの投稿を取得
-    $select_authors = $this->db_manager->get('Admin')->fetchAllAdmin();
+    $all_authors = $this->db_manager->get('Admin')->fetchAllAdmin();
 
-    if (isset($select_authors)) {
+    if ($all_authors) {
 
-      foreach ($select_authors as $author) {
+      $idx = 0;
+
+      foreach ($all_authors as $author) {
 
         //記事を取得
-        $count_admin_posts[] = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($this->application::ACTIVE_STATUS, $author['id']);
+        $count_author_post = $this->db_manager->get('Post')->fetchCountByPostByStatusAndAdminId($this->application::ACTIVE_STATUS, $author['id']);
 
         //いいねの件数を取得
-        $count_admin_likes[] = $this->db_manager->get('Like')->fetchCountLikeByAdminId($author['id']);
+        $count_author_like = $this->db_manager->get('Like')->fetchCountLikeByAdminId($author['id']);
 
         //コメントの件数を取得
-        $count_admin_comments[] = $this->db_manager->get('Comment')->fetchCountCommentByAdminId($author['id']);
+        $count_author_comment = $this->db_manager->get('Comment')->fetchCountCommentByAdminId($author['id']);
+
+        //連想配列に取得した値を追加
+        $all_authors[$idx]['count_author_post'] = $count_author_post['total'];
+        $all_authors[$idx]['count_author_like'] = $count_author_like['total'];
+        $all_authors[$idx]['count_author_comment'] = $count_author_comment['total'];
+
+        $idx++;
       }
     }
 
     return $this->render(array(
       'user' => $user,
-      'select_author' => $select_authors,
-      'count_admin_posts' => $count_admin_posts,
-      'count_admin_likes' => $count_admin_likes,
-      'count_admin_comments' => $count_admin_comments,
+      'all_authors' => $all_authors,
     ), 'authors', 'user_layout');
   }
 
-  //管理の投稿ページを表示
+  //管理者毎の投稿記事を表示
   public function author_postsAction($params)
   {
 
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
-
-    // if (!$this->session->isAuthenticated() || empty($user)) {
-    //   return $this->redirect('/');
-    // }
 
     if ($this->request->isPost()) {
       //いいねをクリックした場合
@@ -648,41 +641,42 @@ class UserController extends Controller
 
     $author = $params['name'];
 
-    $count_post_likes = array();
-    $count_post_comments = array();
-    $confirm_likes = array();
-
     //管理者の投稿を取得
-    $select_posts = $this->db_manager->get('Post')->fetchAllByPostByStatusAndName($this->application::ACTIVE_STATUS, $author);
+    $author_posts = $this->db_manager->get('Post')->fetchAllByPostByStatusAndName($this->application::ACTIVE_STATUS, $author);
 
-    if (isset($select_posts)) {
+    if ($author_posts) {
 
-      foreach ($select_posts as $post) {
+      $idx = 0;
+
+      foreach ($author_posts as $post) {
 
         $post_id = $post['id'];
 
         //いいねの件数を取得
-        $count_post_likes[] = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
+        $count_post_like = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
 
-        //コメントの件数を取得
-        $count_post_comments[] = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
+        // //コメントの件数を取得
+        $count_post_comment = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
-        //ユーザーのいいねを取得
-        $confirm_likes[] = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+        // //ユーザーのいいねを取得
+        $confirm_like = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+
+        //連想配列に取得した値を追加
+        $author_posts[$idx]['count_post_like'] = $count_post_like['total'];
+        $author_posts[$idx]['count_post_comment'] = $count_post_comment['total'];
+        $author_posts[$idx]['confirm_like'] = $confirm_like['total'];
+
+        $idx++;
       }
     }
 
     return $this->render(array(
       'user' => $user,
       'errors' => $errors,
-      'select_posts' => $select_posts,
-      'count_post_likes' => $count_post_likes,
-      'count_post_comments' => $count_post_comments,
-      'confirm_likes' => $confirm_likes,
+      'author_posts' => $author_posts,
       'category' => $this->application::$category_array,
     ), 'author_posts', 'user_layout');
   }
-
 
 
   //userがいいねをした投稿記事を表示
@@ -704,31 +698,35 @@ class UserController extends Controller
     $select_posts = array();
 
     //ユーザーのいいねを取得
-    $select_likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($user['id']);
+    $all_likes = $this->db_manager->get('Like')->fetchAllLikeByUserId($user['id']);
 
-    if (isset($select_likes)) {
+    if ($all_likes) {
 
-      foreach ($select_likes as $like) {
-
-        $post_id = $like['post_id'];
+      //いいねしている場合
+      foreach ($all_likes as $like) {
 
         $count_post_likes = 0;
         $count_post_comments = 0;
 
         //いいねした投稿記事を取得
-        $like_post = $this->db_manager->get('Post')->fetchPostId($post_id);
+        $post_id = $like['post_id'];
+        $select_like_post = $this->db_manager->get('Post')->fetchPostId($post_id);
 
-        if (isset($like_post)) {
-          if ($like_post['status'] != $this->application::NON_ACTIVE_STATUS) {
+        if ($select_like_post) {
+          if ($select_like_post['status'] != $this->application::NON_ACTIVE_STATUS) {
             //投稿記事のいいね件数を取得
             $count_post_likes = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
             //コメントの件数を取得
             $count_post_comments = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
           }
         }
-        $like_post['total_post_likes'] = $count_post_likes['total'];
-        $like_post['total_post_comments'] = $count_post_comments['total'];
-        $select_posts[] = $like_post;
+
+        //連想配列に投稿記事のいいねと、コメント件数を入れる
+        $select_like_post['total_post_likes'] = $count_post_likes['total'];
+        $select_like_post['total_post_comments'] = $count_post_comments['total'];
+
+        //取得した投稿記事を配列に格納
+        $select_posts[] = $select_like_post;
       }
     }
     return $this->render(array(
@@ -815,16 +813,6 @@ class UserController extends Controller
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
 
-    if (!$this->session->isAuthenticated() || empty($user)) {
-      return $this->redirect('/');
-    }
-
-    $select_posts = '';
-
-    $count_post_likes = array();
-    $count_post_comments = array();
-    $confirm_likes = array();
-
     if ($this->request->isPost()) {
 
       //いいねをクリックした場合
@@ -835,23 +823,30 @@ class UserController extends Controller
 
       if (isset($search_box) or isset($search_btn)) {
 
-        //いいねした投稿記事を取得
-        $select_posts = $this->db_manager->get('Post')->fetchAllPostByInputWords($search_box, $this->application::ACTIVE_STATUS);
+        //検索結果を取得
+        $search_posts = $this->db_manager->get('Post')->fetchAllPostByInputWords($search_box, $this->application::ACTIVE_STATUS);
 
-        if (isset($select_posts)) {
+        if ($search_posts) {
+          $idx = 0;
+          foreach ($search_posts as $post) {
 
-          foreach ($select_posts as $select_post) {
-
-            $post_id = $select_post['id'];
+            $post_id = $post['id'];
 
             //いいねの件数を取得
-            $count_post_likes[] = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
+            $count_post_like = $this->db_manager->get('Like')->fetchCountLikeByPostId($post_id);
 
             //コメントの件数を取得
-            $count_post_comments[] = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
+            $count_post_comment = $this->db_manager->get('Comment')->fetchCountCommentByPostId($post_id);
 
             //ユーザーのいいねを取得
-            $confirm_likes[] = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+            $confirm_like = $this->db_manager->get('Like')->fetchCountLikeByUserIdPostId($user['id'], $post_id);
+
+            //連想配列に取得した値を追加
+            $search_posts[$idx]['count_post_like'] = $count_post_like['total'];
+            $search_posts[$idx]['count_post_comment'] = $count_post_comment['total'];
+            $search_posts[$idx]['confirm_like'] = $confirm_like['total'];
+
+            $idx++;
           }
         }
       }
@@ -859,10 +854,7 @@ class UserController extends Controller
 
     return $this->render(array(
       'user' => $user,
-      'select_posts' => $select_posts,
-      'count_post_likes' => $count_post_likes,
-      'count_post_comments' => $count_post_comments,
-      'confirm_likes' => $confirm_likes,
+      'search_posts' => $search_posts,
       'errors' => $errors,
       'search_box' => $search_box,
     ), 'search_post', 'user_layout');
@@ -887,7 +879,7 @@ class UserController extends Controller
 
         if ($select_post_like) {
           //既にレコードがある場合(いいねが押されている場合)
-          $this->db_manager->get('Like')->DelLike($post_id);
+          $this->db_manager->get('Like')->DelLike($post_id, $user['id']);
           $errors[] = 'いいねを取り消しました';
         } else {
           //いいねが押されていない場合

@@ -13,6 +13,7 @@
       while ($fetch_post = current($view_posts)) {
     ?>
         <form method="post" class="box">
+
           <input type="hidden" name="post_id" value="<?php echo $fetch_post['post_id']; ?>">
           <?php if ($fetch_post['image'] != '') : ?>
             <img src="../../uploaded_img/<?php echo $fetch_post['image']; ?>" class="image" alt="">
@@ -32,7 +33,7 @@
             <a href="<?php echo $base_url; ?>/admin/edit_post/<?php echo $fetch_post['post_id']; ?>" class="option-btn">編集</a>
             <button type="submit" name="delete" class="delete-btn" onclick="return confirm('この投稿を削除しますか？');">削除</button>
           </div>
-          <a href="<?php echo $base_url; ?>read_post/<?php echo $fetch_post['post_id']; ?>" class="btn">投稿を見る</a>
+          <a href="<?php echo $base_url; ?>/admin/read_post/<?php echo $fetch_post['post_id']; ?>" class="btn">投稿を見る</a>
         </form>
       <?php
         next($view_posts);

@@ -5,21 +5,8 @@
 <section class="posts-container">
   <div class="box-container">
     <?php
-    if (count($select_posts) > 0) {
-
-      $idx = 0;
-
-      foreach ($select_posts as $post) {
-
-        //記事を取得
-        $total_post_likes = $count_post_likes[$idx]['total'];
-
-        //いいねの件数を取得
-        $total_post_comments = $count_post_comments[$idx]['total'];
-
-        //コメントの件数を取得
-        $confirm_like = $confirm_likes[$idx];
-
+    if (count($author_posts) > 0) {
+      foreach ($author_posts as $post) {
     ?>
         <form method="post" class="box">
           <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
@@ -42,14 +29,13 @@
           <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>" class="inline-btn">もっと見る</a>
           <a href="<?php echo $base_url; ?>/user/category/<?php echo $post['category']; ?>" class="post-cat"> <i class="fas fa-tag"></i> <span><?= $category[$post['category']]; ?></span></a>
           <div class="icons">
-            <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>"><i class="fas fa-comment"></i><span>(<?php echo $total_post_comments; ?>)</span></a>
-            <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if (isset($confirm_like) && (int)$confirm_like['total'] > 0) {
+            <a href="<?php echo $base_url; ?>/user/view_post/<?php echo $post['id']; ?>"><i class="fas fa-comment"></i><span>(<?php echo $post['count_post_comment']; ?>)</span></a>
+            <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($post['confirm_like'] > 0) {
                                                                                     echo 'color:var(--red);';
-                                                                                  } ?>  "></i><span>(<?= $total_post_likes; ?>)</span></button>
+                                                                                  } ?>  "></i><span>(<?= $post['count_post_like']; ?>)</span></button>
           </div>
         </form>
     <?php
-        $idx++;
       }
     } else {
       echo '<p class="empty">まだ投稿はありません。</p>';

@@ -77,7 +77,7 @@ class CommentRepository extends DbRepository
   }
 
   /**
-   * 管理者のコメントの数を取得する
+   * 投稿毎のコメントの数を取得する
    */
   public function fetchCountCommentByPostId($post_id)
   {

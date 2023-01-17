@@ -55,7 +55,7 @@
     <div class="box">
       <h3><?php echo $count_likes; ?></h3>
       <p>総いいね数</p>
-      <a href="<?php echo $base_url; ?>/admin/view_posts" class="btn">いいねされた投稿を確認</a>
+      <a href="<?php echo $base_url; ?>/admin/view_posts" class="btn">全ての投稿を確認</a>
     </div>
 
   </div>

@@ -20,21 +20,12 @@
   <div class="box-container">
     <?php
     if (count($select_posts) > 0) {
-
-      $idx = 0;
-
       foreach ($select_posts as $post) {
-
-        //各投稿毎のいいねの件数を取得
-        $total_post_likes = count($count_post_likes[$idx]);
-
-        //各投稿毎のコメントの件数を取得
-        $total_post_comments = count($count_post_comments[$idx]);
-
     ?>
         <form method="POST" class="box">
           <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
           <input type="hidden" name="admin_id" value="<?php echo $post['admin_id']; ?>">
+          <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
 
           <div class="post-admin">
             <i class="fas fa-user"></i>
@@ -51,67 +42,68 @@
           <div class="post-title"><?php echo $post['title']; ?></div>
           <div class="post-content"><?php echo $post['content']; ?></div>
           <div class="icons">
-            <div><i class="fas fa-comment"></i><span>(<?= $total_post_comments; ?>)</span></div>
-            <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($total_post_likes > 0 and $user['id'] != '') {
+            <div><i class="fas fa-comment"></i><span>(<?= $post['count_post_comment']; ?>)</span></div>
+            <button type="submit" name="like_post"><i class="fas fa-heart" style="<?php if ($post['confirm_like'] > 0 and $user['id'] != '') {
                                                                                     echo 'color:red;';
-                                                                                  }; ?>"></i><span>(<?= $total_post_likes; ?>)</span></button>
+                                                                                  }; ?>"></i><span>(<?= $post['count_post_like']; ?>)</span></button>
           </div>
         </form>
     <?php
-        $idx++;
       }
     } else {
-      echo '<p class="empty">まだ投稿はありません。</p>';
+      echo '<p class="empty">この投稿はありません。</p>';
     }
     ?>
   </div>
 </section>
-<section class="comments-container">
-  <?php if (isset($user['id'])) : ?>
-    <p class="comment-title">コメントを追加</p>
-    <form action="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>" method="POST" class="add-comment">
-      <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
-      <input type="hidden" name="admin_id" value="<?php echo $select_admin_id['admin_id']; ?>">
-      <input type="hidden" name="user_name" value="<?php echo $user['name']; ?>">
-      <p class="user"><i class="fas fa-user"></i><a href="<?php echo $base_url; ?>/user/user_register"><?php echo $user['name']; ?></a></p>
-      <textarea name="comment" maxlength="1000" class="comment-box" cols="30" rows="10" placeholder="コメントを入力してください。" required></textarea>
-      <input type="submit" value="コメントを追加" class="inline-btn" name="add_comment">
-    </form>
-  <?php else : ?>
-    <div class="add-comment">
-      <p>追加、編集するにはログインしてください</p>
-      <a href="<?php echo $base_url; ?>/user/user_login" class="inline-btn">ログイン</a>
-    </div>
-  <?php endif; ?>
-  <p class="comment-title">コメントを投稿</p>
-  <div class="user-comments-container">
-    <?php if (count($select_comments) > 0) : ?>
-      <?php foreach ($select_comments as $comment) : ?>
-        <div class="show-comments" style="<?php if ($comment['user_id'] == $user['id']) {
-                                            echo 'order:-1;';
-                                          } ?>">
-          <div class="comment-user">
-            <i class="fas fa-user"></i>
-            <div>
-              <span><?php echo $comment['user_name']; ?></span>
-              <div><?php echo $comment['date']; ?></div>
-            </div>
-          </div>
-          <div class="comment-box" style="<?php if ($comment['user_id'] == $user['id']) {
-                                            echo 'color:var(--white); background:var(--black);';
-                                          } ?>"><?= $comment['comment']; ?></div>
-          <?php if ($comment['user_id'] == $user['id']) : ?>
-            <form action="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>" method="POST">
-              <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
-              <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
-              <button type="submit" class="inline-option-btn" name="open_edit_box">コメント編集</button>
-              <button type="submit" class="inline-delete-btn" name="delete_comment" onclick="return confirm('削除しますか?');">コメント削除</button>
-            </form>
-          <?php endif; ?>
-        </div>
-      <?php endforeach; ?>
+<?php if (count($select_posts) > 0) : ?>
+  <section class="comments-container">
+    <?php if (isset($user['id'])) : ?>
+      <p class="comment-title">コメントを追加</p>
+      <form action="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>" method="POST" class="add-comment">
+        <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
+        <input type="hidden" name="admin_id" value="<?php echo $select_posts[0]['admin_id']; ?>">
+        <input type="hidden" name="user_name" value="<?php echo $user['name']; ?>">
+        <p class="user"><i class="fas fa-user"></i><a href="<?php echo $base_url; ?>/user/user_register"><?php echo $user['name']; ?></a></p>
+        <textarea name="comment" maxlength="1000" class="comment-box" cols="30" rows="10" placeholder="コメントを入力してください。" required></textarea>
+        <input type="submit" value="コメントを追加" class="inline-btn" name="add_comment">
+      </form>
     <?php else : ?>
-      <?php echo '<p class="empty">まだコメントはまだありません。</p>'; ?>
+      <div class="add-comment">
+        <p>追加、編集するにはログインしてください</p>
+        <a href="<?php echo $base_url; ?>/user/user_login" class="inline-btn">ログイン</a>
+      </div>
     <?php endif; ?>
-  </div>
-</section>
+    <p class="comment-title">投稿されたコメント</p>
+    <div class="user-comments-container">
+      <?php if (count($select_comments) > 0) : ?>
+        <?php foreach ($select_comments as $comment) : ?>
+          <div class="show-comments" style="<?php if ($comment['user_id'] == $user['id']) {
+                                              echo 'order:-1;';
+                                            } ?>">
+            <div class="comment-user">
+              <i class="fas fa-user"></i>
+              <div>
+                <span><?php echo $comment['user_name']; ?></span>
+                <div><?php echo $comment['date']; ?></div>
+              </div>
+            </div>
+            <div class="comment-box" style="<?php if ($comment['user_id'] == $user['id']) {
+                                              echo 'color:var(--white); background:var(--black);';
+                                            } ?>"><?= $comment['comment']; ?></div>
+            <?php if ($comment['user_id'] == $user['id']) : ?>
+              <form action="<?php echo $base_url; ?>/user/view_post/<?php echo $post_id; ?>" method="POST">
+                <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
+                <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
+                <button type="submit" class="inline-option-btn" name="open_edit_box">コメント編集</button>
+                <button type="submit" class="inline-delete-btn" name="delete_comment" onclick="return confirm('削除しますか?');">コメント削除</button>
+              </form>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+      <?php else : ?>
+        <?php echo '<p class="empty">まだコメントはまだありません。</p>'; ?>
+      <?php endif; ?>
+    </div>
+  </section>
+<?php endif; ?>

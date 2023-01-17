@@ -9,15 +9,15 @@
     if ($count_comments == 0) {
       echo '<p class="empty">コメントはまだありません</p>';
     } else {
-      foreach ($comments as $comment) {
+      while ($comment = current($comments)) {
     ?>
-        <div class="post-title">from : <span><?php echo $comment['post_title']; ?></span><a href="read_post.php?post_id=<?php echo $comment['post_id']; ?>">投稿を閲覧</a></div>
+        <div class="post-title">from : <span><?php echo $comment['post_title']; ?></span><a href="<?php echo $base_url; ?>/admin/read_post/<?php echo $comment['post_id']; ?>">投稿を閲覧</a></div>
         <div class="box">
           <div class="user">
             <i class="fas fa-user"></i>
             <div class="user-info">
               <span><?php echo $comment['user_name']; ?></span>
-              <span><?php echo $comment['date']; ?></span>
+              <div><?php echo $comment['date']; ?></div>
             </div>
           </div>
           <div class="text"><?php echo $comment['comment'] ?></div>
@@ -27,6 +27,7 @@
           </form>
         </div>
     <?php
+        next($comments);
       }
     }
     ?>

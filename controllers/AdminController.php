@@ -352,6 +352,10 @@ class AdminController extends Controller
           $this->db_manager->get('Post')->delete($id);
           //コメントの削除
           $this->db_manager->get('Comment')->deleteByPostId($id);
+
+          //いいねの削除
+          $this->db_manager->get('Like')->deleteByPostId($id);
+
           $message[] = '投稿を削除しました。';
         }
       }
@@ -434,7 +438,7 @@ class AdminController extends Controller
       $delete_comment = $this->request->getPost('delete_comment');
       if (isset($delete_comment)) {
         //コメントの削除
-        $comment_id = $delete_comment['comment_id'];
+        $comment_id = $this->request->getPost('comment_id');
         $this->db_manager->get('Comment')->delete($comment_id);
         $message[] = 'コメントを削除しました。';
       }
@@ -466,25 +470,13 @@ class AdminController extends Controller
     }
 
     //コメントデータの取得
-    $comments = array();
-    $select_comments = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
-    if ($select_comments) {
-      while ($fetch_comments = current($select_comments)) {
-        $comments[] = [
-          'id' => $fetch_comments['id'],
-          'user_name' => $fetch_comments['user_name'],
-          'date' => $fetch_comments['date'],
-          'comment' => $fetch_comments['comment'],
-        ];
-        next($select_comments);
-      }
-    }
+    $post_comments = $this->db_manager->get('Comment')->fetchAllCommentByPostId($post_id);
 
     return $this->render(array(
       'errors' => $message,
       'admin' => $admin,
       'view_posts' => $view_posts,
-      'comments' => $comments,
+      'comments' => $post_comments,
     ), 'read_post', 'admin_layout');
   }
 
@@ -580,16 +572,16 @@ class AdminController extends Controller
     $count_comments = count($select_comments);
 
     if ($select_comments) {
-      while ($fetch_accounts = current($select_comments)) {
-        $select_posts = $this->db_manager->get('Post')->fetchPostId($fetch_accounts['post_id']);
+      while ($fetch_comments = current($select_comments)) {
+        $select_posts = $this->db_manager->get('Post')->fetchPostId($fetch_comments['post_id']);
 
         $comments[] = [
           'post_id' => $select_posts['id'],
           'post_title' => $select_posts['title'],
-          'id' => $select_comments['id'],
-          'user_name' => $select_comments['user_name'],
-          'date' => $select_comments['date'],
-          'comment' => $select_comments['comment']
+          'id' => $fetch_comments['id'],
+          'user_name' => $fetch_comments['user_name'],
+          'date' => $fetch_comments['date'],
+          'comment' => $fetch_comments['comment']
         ];
         next($select_comments);
       }
@@ -645,6 +637,7 @@ class AdminController extends Controller
   //投稿の編集
   public function edit_postAction($param)
   {
+
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
 
@@ -666,10 +659,6 @@ class AdminController extends Controller
         $category = $this->request->getPost('category');
         $status = $this->request->getPost('status');
 
-        //投稿の削除
-        $this->db_manager->get('Post')->update($title, $content, $category, $status, $post_id);
-        $message[] = '更新しました。';
-
         $old_image = $this->request->getPost('old_image');
         $image = htmlspecialchars($_FILES['image']['name']);
         $image_size = $_FILES['image']['size'];
@@ -678,18 +667,26 @@ class AdminController extends Controller
         $select_image = $this->db_manager->get('Post')->fetchPostByImageAndAdminId($image, $admin['id']);
 
         if (!empty($image)) {
-          if ($image_size > 2000000) {
+          if ($image_size > $this->application::MAX_IMAGE_FILE_SIZE) {
             $message[] = '画像サイズが大きすぎます。';
-          } elseif ($select_image->rowCount() > 0 and $image != '') {
+          } elseif ($select_image != false and $image != '') {
             $message[] = '画像ファイル名が同じです。';
           } else {
-            move_uploaded_file($image_tmp_name, $image_folder);
-            $this->db_manager->get('Post')->updateImage($image, $post_id);
+            $generateImageName = $this->generateImageName($image);
+            $imagePath = '../web/uploaded_img/' . $generateImageName;
+            move_uploaded_file($image_tmp_name, $imagePath);
+            $this->db_manager->get('Post')->updateImage($generateImageName, $post_id);
             if ($old_image != $image and $old_image != '') {
               unlink('../web/upload_img/' . $old_image);
             }
             $message[] = '画像を更新しました。';
           }
+        }
+
+        //投稿の削除
+        if (count($message) == 0) {
+          $this->db_manager->get('Post')->update($title, $content, $category, $status, $post_id);
+          $message[] = '更新しました。';
         }
       }
 

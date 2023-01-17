@@ -23,7 +23,7 @@ $this->setLayoutVar('user', $user);
   <p class="comment-title">投稿に対するコメント</p>
   <div class="user-comments-container">
     <?php
-    if (isset($select_comments)) {
+    if (count($select_comments) > 0) {
       foreach ($select_comments as $comment) {
     ?>
         <div class="show-comments">
@@ -46,7 +46,7 @@ $this->setLayoutVar('user', $user);
     <?php
       }
     } else {
-      echo '<p class="empty>コメントはまだありません</p>';
+      echo '<p class="empty">コメントはまだありません</p>';
     }
     ?>
   </div>

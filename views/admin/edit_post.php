@@ -37,13 +37,13 @@
       <input type="file" name="image" class="box" accept="image/jpg, image/jpeg, image/png, image/webp">
       <?php if ($select_posts['image'] != '') : ?>
         <img src="../../uploaded_img/<?php echo $select_posts['image']; ?>" class="image" alt="">
-        <input type="submit" value="画像削除" class="inline-delete-btn" name="delete_image">
+        <button type="submit" name="delete_image" class="inline-delete-btn" onclick="return confirm('画像を削除しますか？');">画像削除</button>
       <?php endif; ?>
 
       <div class="flex-btn">
         <input type="submit" value="編集" name="save" class="btn">
         <a href="<?php echo $base_url; ?>/admin/view_posts" class="option-btn">戻る</a>
-        <input type="submit" value="投稿を削除" class="delete-btn" name="delete_post">
+        <button type="submit" name="delete_post" class="delete-btn" onclick="return confirm('この投稿を削除しますか？');">投稿を削除</button>
       </div>
     </form>
   <?php else : ?>

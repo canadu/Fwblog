@@ -45,7 +45,6 @@ class LikeRepository extends DbRepository
   }
 
 
-
   /**
    * 投稿毎のいいねを取得する。
    */
@@ -77,10 +76,10 @@ class LikeRepository extends DbRepository
   /**
    * ユーザーのいいねを削除
    */
-  public function DelLike($post_id)
+  public function DelLike($post_id, $user_id)
   {
-    $sql = "DELETE FROM likes WHERE post_id = :post_id";
-    return $this->execute($sql, array(':post_id' => $post_id));
+    $sql = "DELETE FROM likes WHERE post_id = :post_id and user_id = :user_id";
+    return $this->execute($sql, array(':post_id' => $post_id, ':user_id' => $user_id));
   }
 
 
@@ -91,5 +90,14 @@ class LikeRepository extends DbRepository
   {
     $sql = "DELETE FROM likes WHERE admin_id = :admin_id";
     return $this->execute($sql, array(':admin_id' => $admin_id));
+  }
+
+  /**
+   * 投稿のいいねを削除
+   */
+  public function deleteByPostId($post_id)
+  {
+    $sql = "DELETE FROM likes WHERE post_id = :post_id";
+    return $this->execute($sql, array(':post_id' => $post_id));
   }
 }
