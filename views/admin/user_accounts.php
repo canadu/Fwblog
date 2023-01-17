@@ -5,7 +5,7 @@
   <h1 class="heading">ユーザーアカウント</h1>
   <div class="box-container">
     <?php
-    if (!empty($users_list)) {
+    if (count($users_list) > 0) {
       foreach ($users_list as $user) {
     ?>
         <div class="box">

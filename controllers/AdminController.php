@@ -48,16 +48,6 @@ class AdminController extends Controller
     ), 'dashboard', 'admin_layout');
   }
 
-  // //管理者登録
-  // public function signupAction()
-  // {
-  //   return $this->render(array(
-  //     'name' => '',
-  //     'password' => '',
-  //     '_token' => $this->generateCsrfToken('account/signup'),
-  //   ));
-  // }
-
   //新規投稿
   public function add_postsAction()
   {
@@ -70,6 +60,12 @@ class AdminController extends Controller
 
     //POST送信か?
     if ($this->request->isPost()) {
+
+      $token = $this->request->getPost('_token');
+      if (!$this->checkCsrfToken('admin/add_posts', $token)) {
+        return $this->redirect('/admin/dashboard');
+      }
+
       $result = false;
       if (!is_null($this->request->getPost('publish'))) {
         $result = $this->Post($admin['id'], $this->application::ACTIVE_STATUS);
@@ -87,6 +83,7 @@ class AdminController extends Controller
     return $this->render(array(
       'admin' => $admin,
       'category' => $this->application::$category_array,
+      '_token' => $this->generateCsrfToken('admin/add_posts'),
       'errors' => $message,
     ), 'add_posts', 'admin_layout');
   }
@@ -168,7 +165,7 @@ class AdminController extends Controller
       //CSRFトークンは正しいか？
       $token = $this->request->getPost('_token');
       if (!$this->checkCsrfToken('admin/admin_register', $token)) {
-        return $this->redirect('/admin/admin_register');
+        return $this->redirect('/admin/dashboard');
       }
 
       //フォームの入力内容を変数に格納
@@ -256,7 +253,7 @@ class AdminController extends Controller
       //CSRFトークンは正しいか？
       $token = $this->request->getPost('_token');
       if (!$this->checkCsrfToken('admin/update_profile', $token)) {
-        return $this->redirect('/admin/update_profile');
+        return $this->redirect('/admin/dashboard');
       }
 
       //ユーザー名の取得
@@ -493,6 +490,12 @@ class AdminController extends Controller
 
     if ($this->request->isPost()) {
 
+      //CSRFトークンは正しいか？
+      $token = $this->request->getPost('_token');
+      if (!$this->checkCsrfToken('admin/admin_accounts', $token)) {
+        return $this->redirect('/admin/dashboard');
+      }
+
       //削除処理
       $delete = $this->request->getPost('delete');
 
@@ -541,6 +544,7 @@ class AdminController extends Controller
       'admin' => $admin,
       'admin_posts' => $admin_posts,
       'admin_count' => $admin_count,
+      '_token' => $this->generateCsrfToken('admin/admin_accounts'),
     ), 'admin_accounts', 'admin_layout');
   }
 
@@ -647,6 +651,12 @@ class AdminController extends Controller
 
     if ($this->request->isPost()) {
 
+      //CSRFトークンは正しいか？
+      $token = $this->request->getPost('_token');
+      if (!$this->checkCsrfToken('admin/edit_post', $token)) {
+        return $this->redirect('/admin/dashboard');
+      }
+
       //編集処理/
       $save = $this->request->getPost('save');
       if (isset($save)) {
@@ -663,7 +673,7 @@ class AdminController extends Controller
         $image = htmlspecialchars($_FILES['image']['name']);
         $image_size = $_FILES['image']['size'];
         $image_tmp_name = $_FILES['image']['tmp_name'];
-        $image_folder = '../web/upload_img/' . $image;
+        // $image_folder = '../web/upload_img/' . $image;
         $select_image = $this->db_manager->get('Post')->fetchPostByImageAndAdminId($image, $admin['id']);
 
         if (!empty($image)) {
@@ -734,6 +744,7 @@ class AdminController extends Controller
       'admin' => $admin,
       'errors' => $message,
       'category' => $this->application::$category_array,
+      '_token' => $this->generateCsrfToken('admin/edit_post'),
       'select_posts' => $select_posts,
     ), 'edit_post', 'admin_layout');
   }

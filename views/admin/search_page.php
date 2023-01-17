@@ -7,7 +7,7 @@
   </form>
   <div class="box-container">
     <?php
-    if (!empty($search_posts)) {
+    if (count($search_posts) > 0) {
       foreach ($search_posts as $search_post) {
     ?>
         <form method="post" class="box">

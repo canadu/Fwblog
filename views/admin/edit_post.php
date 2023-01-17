@@ -4,11 +4,12 @@
 <section class="post-editor">
   <h1 class="heading">投稿記事の修正</h1>
   <?php
-  if (!empty($select_posts)) :
+  if (count($select_posts) > 0) :
   ?>
     <form action="" method="POST" enctype="multipart/form-data">
       <input type="hidden" name="old_image" value="<?php echo $select_posts['image']; ?>">
       <input type="hidden" name="post_id" value="<?php echo $select_posts['id']; ?>">
+      <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
 
       <p>投稿ステータス <span>*</span></p>
       <select name="status" class="box" required>

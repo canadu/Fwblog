@@ -9,7 +9,7 @@
   </form>
   <div class="box-container">
     <?php
-    if (!empty($view_posts)) {
+    if (count($view_posts) > 0) {
       while ($fetch_post = current($view_posts)) {
     ?>
         <form method="post" class="box">

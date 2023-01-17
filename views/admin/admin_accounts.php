@@ -25,7 +25,7 @@
           ?>
             <form action="" method="POST">
               <div class="flex-btn">
-
+                <input type="hidden" name="_token" value="<?php echo $this->escape($_token); ?>" />
                 <a href="<?php echo $base_url; ?>/admin/update_profile" class="option-btn" style="margin-bottom: .5rem;">更新</a>
                 <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>" on>
                 <button type="submit" name="delete" onclick="return confirm('アカウントを削除しますか？');" class="delete-btn" style="margin-bottom:.5rem;">削除</button>
