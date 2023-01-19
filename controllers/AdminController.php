@@ -241,6 +241,7 @@ class AdminController extends Controller
   {
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
+    $name = $admin['name'];
 
     if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
@@ -259,12 +260,17 @@ class AdminController extends Controller
       //ユーザー名の取得
       $name = $this->request->getPost('name');
 
-      if (!empty($name)) {
+      if (!mb_strlen($name)) {
+        $message[] = 'ユーザー名を入力してください。';
+      } else if (!preg_match('/^\w{3,20}$/', $name)) {
+        $message[] = 'ユーザーIDは半角英数字およびアンダースコアを3～20文字で入力して下さい';
+      } else {
         // レコードの登録
         $adminUser = $this->db_manager->get('Admin')->fetchByUserName($name);
         if ($adminUser) {
           $message[] = 'ユーザー名は既に利用されています。';
         } else {
+
           //ユーザー情報の更新
           $this->db_manager->get('Admin')->updateName($admin['id'], $name);
 
@@ -284,11 +290,13 @@ class AdminController extends Controller
       $new_password = $this->request->getPost('new_password');
       $confirm_password = $this->request->getPost('confirm_password');
 
-      if (!empty($old_password)) {
+      if (mb_strlen($old_password)) {
         if (!password_verify($old_password, $prev_password)) {
           $message[] = '古いパスワードが一致しません。';
         } elseif ($new_password != $confirm_password) {
           $message[] = 'パスワードが一致しません。';
+        } elseif (4 > mb_strlen($confirm_password) || mb_strlen($confirm_password) > 30) {
+          $message[] = 'パスワードは4～30文字以内で入力して下さい';
         } else {
           // 更新処理を入れること
           $this->db_manager->get('Admin')->updatePassword($admin['id'], $confirm_password);
@@ -308,6 +316,7 @@ class AdminController extends Controller
     return $this->render(array(
       'errors' => $message,
       'admin' => $admin,
+      'name' => $name,
       '_token' => $this->generateCsrfToken('admin/update_profile'),
     ), 'update_profile', 'admin_layout');
   }

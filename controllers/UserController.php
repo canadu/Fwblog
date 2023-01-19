@@ -361,7 +361,7 @@ class UserController extends Controller
       'password' => $password,
       'errors' => $errors,
       //トークンを作成する
-      '_token' => $this->generateCsrfToken('account/user_register'),
+      '_token' => $this->generateCsrfToken('user/user_register'),
     ), 'user_register', 'user_login_layout');
   }
 
@@ -373,6 +373,19 @@ class UserController extends Controller
 
     //セッションからユーザー情報を取得
     $user = $this->session->get('user');
+
+    if ($this->request->isPost()) {
+
+      //CSRFトークンは正しいか?
+      $token = $this->request->getPost('_token');
+      if (!$this->checkCsrfToken('user/category', $token)) {
+        return $this->redirect('/');
+      }
+
+      //いいねをクリックした場合
+      $errors = $this->like_action($user);
+    }
+
 
     //カテゴリー毎の投稿を取得
     $category_posts = $this->db_manager->get('Post')->fetchByPostByCategory($params['key'], $this->application::ACTIVE_STATUS);
@@ -406,6 +419,8 @@ class UserController extends Controller
     return $this->render(array(
       'user' => $user,
       'category_posts' => $category_posts,
+      '_token' => $this->generateCsrfToken('user/category'),
+      'errors' => $errors,
     ), 'show_category', 'user_layout');
   }
 
