@@ -241,7 +241,6 @@ class AdminController extends Controller
   {
     //管理者のセッション情報を取得する
     $admin = $this->session->get('admin');
-    $name = $admin['name'];
 
     if (!$this->session->isAdminAuthenticated() || empty($admin)) {
       return $this->redirect('/admin/admin_login');
@@ -260,25 +259,29 @@ class AdminController extends Controller
       //ユーザー名の取得
       $name = $this->request->getPost('name');
 
-      if (!mb_strlen($name)) {
-        $message[] = 'ユーザー名を入力してください。';
-      } else if (!preg_match('/^\w{3,20}$/', $name)) {
-        $message[] = 'ユーザーIDは半角英数字およびアンダースコアを3～20文字で入力して下さい';
-      } else {
-        // レコードの登録
-        $adminUser = $this->db_manager->get('Admin')->fetchByUserName($name);
-        if ($adminUser) {
-          $message[] = 'ユーザー名は既に利用されています。';
+      $dbAdmin = $this->db_manager->get('Admin')->fetchById($admin['id']);
+      if ($name != $dbAdmin['name']) {
+        //DBと異なるユーザー名が入力されている場合のみチェックを行う
+        if (!mb_strlen($name)) {
+          $message[] = 'ユーザー名を入力してください。';
+        } else if (!preg_match('/^\w{3,20}$/', $name)) {
+          $message[] = 'ユーザーIDは半角英数字およびアンダースコアを3～20文字で入力して下さい';
         } else {
+          // レコードの登録
+          $adminUser = $this->db_manager->get('Admin')->fetchByUserName($name);
+          if ($adminUser) {
+            $message[] = 'ユーザー名は既に利用されています。';
+          } else {
 
-          //ユーザー情報の更新
-          $this->db_manager->get('Admin')->updateName($admin['id'], $name);
+            //ユーザー情報の更新
+            $this->db_manager->get('Admin')->updateName($admin['id'], $name);
 
-          //管理者名の更新
-          $this->db_manager->get('Post')->updateName($admin['id'], $name);
+            //管理者名の更新
+            $this->db_manager->get('Post')->updateName($admin['id'], $name);
 
-          $message[] = 'ユーザー名を更新しました。';
-          $updateFg = true;
+            $message[] = 'ユーザー名を更新しました。';
+            $updateFg = true;
+          }
         }
       }
 
@@ -316,7 +319,6 @@ class AdminController extends Controller
     return $this->render(array(
       'errors' => $message,
       'admin' => $admin,
-      'name' => $name,
       '_token' => $this->generateCsrfToken('admin/update_profile'),
     ), 'update_profile', 'admin_layout');
   }

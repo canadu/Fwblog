@@ -9,7 +9,7 @@ class UserRepository extends DbRepository
 
 
   /**
-   * ログインユーザーに関連するコメントを取得する。
+   * ログインユーザーを取得する
    */
   public function fetchByUser($email)
   {
@@ -17,7 +17,7 @@ class UserRepository extends DbRepository
     return $this->fetch($sql, array(':email' => $email));
   }
   /**
-   * ログインユーザーに関連するコメントを取得する。
+   * ログインユーザーを取得する
    */
   public function fetchByUserById($id)
   {

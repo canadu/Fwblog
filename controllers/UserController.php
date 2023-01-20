@@ -196,18 +196,19 @@ class UserController extends Controller
 
       //バリデーション
       $errFg = false;
-      if (mb_strlen($name) > 0) {
-        if (!preg_match('/^\w{3,20}$/', $name)) {
+
+      //DBからユーザーを取得
+      $dbUser = $this->db_manager->get('User')->fetchByUserById($user['id']);
+
+      if ($name != $dbUser['name']) {
+        if (!mb_strlen($name)) {
+          $errors[] = 'ユーザー名を入力してください。';
+          $errFg = true;
+        } else if (!preg_match('/^\w{3,20}$/', $name)) {
           $errors[] = 'ユーザーIDは半角英数字およびアンダースコアを3～20文字で入力して下さい';
           $errFg = true;
         }
       }
-      // if (mb_strlen($email) > 0) {
-      //   if (!preg_match('/^[a-z0-9._+^~-]+@[a-z0-9.-]+$/i', $email)) {
-      //     $errors[] = '正しいメールアドレスを入力して下さい';
-      //     $errFg = true;
-      //   }
-      // }
 
       if ($errFg) {
         goto GOTO_ERROR;
@@ -219,6 +220,7 @@ class UserController extends Controller
           $errFg = true;
         }
       }
+
       if ($errFg) {
         goto GOTO_ERROR;
       } else {
@@ -227,18 +229,6 @@ class UserController extends Controller
         if (mb_strlen($name) > 0) {
           $this->db_manager->get('User')->updateUserNameById($name, $user['id']);
         }
-
-        // メールアドレスの更新
-        // if (mb_strlen($email) > 0) {
-        //   $confirm_exist_email = $this->db_manager->get('User')->fetchByUser($email);
-        //   if (count($confirm_exist_email) > 0) {
-        //     $errors[] = "このメールアドレスは使用できません。";
-        //     $errFg = true;
-        //   } else {
-        //     //emailの更新
-        //     $this->db_manager->get('User')->updateEmailById($email, $user['id']);
-        //   }
-        // }
 
         $select_prev_pass = $this->db_manager->get('User')->fetchByUserById($user['id']);
         $prev_password = $select_prev_pass['password'];
